@@ -2,26 +2,41 @@ package com.elca.backend.controller;
 
 import com.elca.backend.model.Employee;
 import com.elca.backend.repository.EmployeeRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/employee")
+@Tag(name = "Employee")
 public class EmployeeController {
 
     @Autowired
     private EmployeeRepository employeeRepository;
 
     @GetMapping
-    public ResponseEntity<List<Employee>> getAllEmployee() {
+    @Operation(summary = "Get all employees")
+    public ResponseEntity<List<Employee>> getAllEmployees() {
         List<Employee> employees = employeeRepository.findAll();
         return new ResponseEntity<>(employees, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get employee by id")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+        Optional<Employee> employeeOptional = employeeRepository.findById(id);
+        return employeeOptional
+                .map(employee -> new ResponseEntity<>(employee, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
 }
