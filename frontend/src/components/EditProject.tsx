@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router';
-import axios from 'axios';
+import API from '../api';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -28,20 +28,21 @@ const EditProject: React.FunctionComponent<Props> = () => {
     const [endDate, setEndDate] = useState<Date | null>(null);
 
     useEffect(() => {
-        axios
-            .get<ProjectStatus[]>(
-                'http://localhost:8080/project/pre-defined-status'
-            )
-            .then((res) => {
-                if (res.status === 200) {
-                    const result: ProjectStatus[] = res.data.map((item) => ({
-                        key: item.key,
-                        label: item.label
-                    }));
-                    setProjectStatusList(result);
-                }
-            });
+        getPreDefinedStatus();
     }, []);
+
+    const getPreDefinedStatus = async () => {
+        const response = await API.get<ProjectStatus[]>(
+            'project/pre-defined-status'
+        );
+        if (response.status === 200) {
+            const result: ProjectStatus[] = response.data.map((item) => ({
+                key: item.key,
+                label: item.label
+            }));
+            setProjectStatusList(result);
+        }
+    };
 
     const handleProjectNumberChange = (
         e: React.ChangeEvent<HTMLInputElement>
