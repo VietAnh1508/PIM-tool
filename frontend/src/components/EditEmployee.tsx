@@ -119,6 +119,9 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                             <div className='col-sm-6'>
                                 <DatePicker
                                     dateFormat='dd/MM/yyyy'
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode='select'
                                     selected={birthDate}
                                     onChange={(date: any) => setBirthDate(date)}
                                 />

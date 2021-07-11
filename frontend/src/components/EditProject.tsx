@@ -227,6 +227,9 @@ const EditProject: React.FunctionComponent<Props> = () => {
                             <div className='col-sm-6'>
                                 <DatePicker
                                     dateFormat='dd/MM/yyyy'
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode='select'
                                     selected={startDate}
                                     onChange={(date: any) => setStartDate(date)}
                                 />
@@ -246,6 +249,9 @@ const EditProject: React.FunctionComponent<Props> = () => {
                             <div className='col-sm-6'>
                                 <DatePicker
                                     dateFormat='dd/MM/yyyy'
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode='select'
                                     selected={endDate}
                                     onChange={(date: any) => setEndDate(date)}
                                 />
