@@ -20,7 +20,16 @@ import java.util.Set;
 public class Project extends AbstractEntity {
 
     public enum Status {
-        NEW, PLA, INP, FIN
+        NEW("New"),
+        PLA("Planned"),
+        INP("In progress"),
+        FIN("Finished");
+
+        public final String label;
+
+        Status(String label) {
+            this.label = label;
+        }
     }
 
     @Column(unique = true)
