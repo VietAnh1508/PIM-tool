@@ -1,6 +1,7 @@
 package com.elca.backend.controller;
 
 import com.elca.backend.dto.EmployeeDto;
+import com.elca.backend.exception.RecordNotFoundException;
 import com.elca.backend.exception.EmployeeVisaAlreadyExistsException;
 import com.elca.backend.model.Employee;
 import com.elca.backend.repository.EmployeeRepository;
@@ -41,11 +42,11 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get employee by id")
-    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) throws RecordNotFoundException {
         Optional<Employee> employeeOptional = employeeRepository.findById(id);
         return employeeOptional
                 .map(employee -> new ResponseEntity<>(employee, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new RecordNotFoundException("Employee not found with id: " + id));
     }
 
     @PostMapping

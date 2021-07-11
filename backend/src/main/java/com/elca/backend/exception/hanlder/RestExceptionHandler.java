@@ -1,5 +1,6 @@
 package com.elca.backend.exception.hanlder;
 
+import com.elca.backend.exception.RecordNotFoundException;
 import com.elca.backend.exception.model.ErrorResponse;
 import com.elca.backend.exception.EmployeeVisaAlreadyExistsException;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +34,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST, "Some mandatory fields are missing", errors);
         return handleExceptionInternal(ex, errorResponse, headers, errorResponse.getStatus(), request);
+    }
+
+    @ExceptionHandler(RecordNotFoundException.class)
+    private ResponseEntity<ErrorResponse> handleRecordNotFoundException(RecordNotFoundException ex) {
+        List<String> errors = new ArrayList<>();
+        errors.add(ex.getLocalizedMessage());
+        ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND, "Record not found", errors);
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(EmployeeVisaAlreadyExistsException.class)
