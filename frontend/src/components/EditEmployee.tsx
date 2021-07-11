@@ -15,14 +15,20 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
     const [lastName, setLastName] = useState<string>('');
     const [birthDate, setBirthDate] = useState<Date | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('visa', visa);
-        console.log('first name', firstName);
-        console.log('last name', lastName);
-        console.log('birthdate', birthDate);
 
-        // TODO: send data to server
+        const data = {
+            visa,
+            firstName,
+            lastName,
+            birthDate
+        };
+
+        const response = await API.post('employee', data);
+        if (response.status === 201) {
+            console.log('success');
+        }
 
         resetFormData();
     };
