@@ -1,22 +1,34 @@
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import Content from './components/Content';
+import ListProject from './components/ListProject';
+import EditProject from './components/EditProject';
 
 function App() {
     return (
-        <div className='container'>
-            <div className='row border-bottom'>
-                <Header />
-            </div>
-            <div className='row d-flex'>
-                <div className='col border-end'>
-                    <Sidebar />
+        <Router>
+            <div className='container'>
+                <div className='row border-bottom'>
+                    <Header />
                 </div>
-                <div className='col-10'>
-                    <Content />
+                <div className='row d-flex'>
+                    <div className='col border-end'>
+                        <Sidebar />
+                    </div>
+                    <div className='col-10'>
+                        <Switch>
+                            <Route path='/list-project'>
+                                <ListProject />
+                            </Route>
+                            <Route path='/edit-project'>
+                                <EditProject />
+                            </Route>
+                        </Switch>
+                    </div>
                 </div>
             </div>
-        </div>
+        </Router>
     );
 }
 
