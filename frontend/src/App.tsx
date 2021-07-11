@@ -18,11 +18,14 @@ function App() {
                     </div>
                     <div className='col-10'>
                         <Switch>
-                            <Route path='/list-project'>
-                                <ListProject />
-                            </Route>
-                            <Route path='/edit-project'>
+                            <Route path='/project/new'>
                                 <EditProject />
+                            </Route>
+                            <Route path='/project/edit'>
+                                <EditProject />
+                            </Route>
+                            <Route path='/project'>
+                                <ListProject />
                             </Route>
                         </Switch>
                     </div>

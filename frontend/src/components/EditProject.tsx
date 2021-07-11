@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -6,6 +7,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 export interface Props {}
 
 const EditProject: React.FunctionComponent<Props> = () => {
+    const history = useHistory();
+
     const [projectNumber, setProjectNumber] = useState<number>(0);
     const [projectName, setProjectName] = useState<string>('');
     const [customer, setCustomer] = useState<string>('');
@@ -41,6 +44,26 @@ const EditProject: React.FunctionComponent<Props> = () => {
         console.log('status', status);
         console.log('start date', startDate);
         console.log('end date', endDate);
+
+        // TODO: send data to server
+
+        resetFormData();
+    };
+
+    const handleCancel = () => {
+        resetFormData();
+        history.goBack();
+    };
+
+    const resetFormData = () => {
+        setProjectNumber(0);
+        setProjectName('');
+        setCustomer('');
+        // TODO: reset group
+        setMembers([]);
+        // TODO: reset status
+        setStartDate(null);
+        setEndDate(null);
     };
 
     return (
@@ -204,7 +227,11 @@ const EditProject: React.FunctionComponent<Props> = () => {
                     </div>
                 </div>
                 <div className='d-grid gap-2 d-md-flex justify-content-md-end'>
-                    <button className='btn btn-secondary me-md-2' type='button'>
+                    <button
+                        className='btn btn-secondary me-md-2'
+                        type='button'
+                        onClick={handleCancel}
+                    >
                         Cancel
                     </button>
                     <button className='btn btn-primary' type='submit'>
