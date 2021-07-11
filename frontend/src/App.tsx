@@ -4,6 +4,8 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import ListProject from './components/ListProject';
 import EditProject from './components/EditProject';
+import ListEmployee from './components/ListEmployee';
+import EditEmployee from './components/EditEmployee';
 
 function App() {
     return (
@@ -26,6 +28,15 @@ function App() {
                             </Route>
                             <Route path='/project'>
                                 <ListProject />
+                            </Route>
+                            <Route path='/employee/new'>
+                                <EditEmployee />
+                            </Route>
+                            <Route path='/employee/edit'>
+                                <EditEmployee />
+                            </Route>
+                            <Route path='/employee'>
+                                <ListEmployee />
                             </Route>
                         </Switch>
                     </div>
