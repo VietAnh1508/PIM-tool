@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router';
+import axios from 'axios';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 export interface Props {}
+
+interface ProjectStatus {
+    key: string;
+    label: string;
+}
 
 const EditProject: React.FunctionComponent<Props> = () => {
     const history = useHistory();
@@ -15,8 +21,27 @@ const EditProject: React.FunctionComponent<Props> = () => {
     const [group, setGroup] = useState<string>();
     const [memebers, setMembers] = useState<string[]>([]);
     const [status, setStatus] = useState<string>();
+    const [projectStatusList, setProjectStatusList] = useState<ProjectStatus[]>(
+        []
+    );
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
+
+    useEffect(() => {
+        axios
+            .get<ProjectStatus[]>(
+                'http://localhost:8080/project/pre-defined-status'
+            )
+            .then((res) => {
+                if (res.status === 200) {
+                    const result: ProjectStatus[] = res.data.map((item) => ({
+                        key: item.key,
+                        label: item.label
+                    }));
+                    setProjectStatusList(result);
+                }
+            });
+    }, []);
 
     const handleProjectNumberChange = (
         e: React.ChangeEvent<HTMLInputElement>
@@ -179,10 +204,11 @@ const EditProject: React.FunctionComponent<Props> = () => {
                                 setStatus(e.currentTarget.value)
                             }
                         >
-                            <option value='new'>New</option>
-                            <option value='pla'>Planned</option>
-                            <option value='inp'>In progress</option>
-                            <option value='fin'>Finished</option>
+                            {projectStatusList.map((status) => (
+                                <option value={status.key} key={status.key}>
+                                    {status.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
