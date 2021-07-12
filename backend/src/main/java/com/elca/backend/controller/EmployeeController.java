@@ -62,7 +62,7 @@ public class EmployeeController {
     @Operation(summary = "Delete employee")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         employeeRepository.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }
