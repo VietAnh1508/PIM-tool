@@ -12,8 +12,8 @@ export const AlertType = {
 };
 
 export interface AlertOption {
-    autoClose: boolean;
-    keepAfterRouteChange: boolean;
+    autoClose?: boolean;
+    keepAfterRouteChange?: boolean;
 }
 
 export interface Alert {
@@ -48,7 +48,7 @@ function warn(message: string, options?: AlertOption) {
 
 function alert(alert: Alert) {
     alert.id = alert.id || defaultId;
-    alert.autoClose = alert.autoClose || true;
+    alert.autoClose = alert.autoClose ?? true;
     alertSubject.next(alert);
 }
 
