@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import Alert from './components/Alert';
 import ListProject from './components/ListProject';
 import EditProject from './components/EditProject';
 import ListEmployee from './components/ListEmployee';
@@ -19,6 +20,7 @@ function App() {
                         <Sidebar />
                     </div>
                     <div className='col-10'>
+                        <Alert />
                         <Switch>
                             <Route path='/project/new'>
                                 <EditProject />
