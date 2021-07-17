@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router';
 import API from '../api';
+import { alertService } from '../service/alertService';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -25,12 +26,17 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
             birthDate
         };
 
-        const response = await API.post('employee', data);
-        if (response.status === 201) {
-            console.log('success');
+        try {
+            const response = await API.post('employee', data);
+            if (response.status === 201) {
+                alertService.success('Save successfully');
+            }
+            resetFormData();
+        } catch (err) {
+            alertService.error(err.response.data.errors[0], {
+                autoClose: false
+            });
         }
-
-        resetFormData();
     };
 
     const handleCancel = () => {
