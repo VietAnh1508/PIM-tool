@@ -15,13 +15,13 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class EmployeeDto {
 
-    @NotBlank
+    @NotBlank(message = "VISA is required")
     private String visa;
 
-    @NotBlank
+    @NotBlank(message = "First name is required")
     private String firstName;
 
-    @NotBlank
+    @NotBlank(message = "Last name is required")
     private String lastName;
 
     private LocalDate birthDate;
