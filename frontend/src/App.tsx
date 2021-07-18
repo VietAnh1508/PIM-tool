@@ -31,10 +31,7 @@ function App() {
                             <Route path='/project'>
                                 <ListProject />
                             </Route>
-                            <Route path='/employee/new'>
-                                <EditEmployee />
-                            </Route>
-                            <Route path='/employee/edit'>
+                            <Route path='/employee/:action/:id?'>
                                 <EditEmployee />
                             </Route>
                             <Route path='/employee'>

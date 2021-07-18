@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router';
+import { Link } from 'react-router-dom';
 
 import API from '../api';
 import { alertService } from '../service/alertService';
@@ -65,7 +66,7 @@ const ListEmployee: React.FunctionComponent<Props> = () => {
     const handleDeleteItem = async (id: number) => {
         const response = await API.delete(`employee/${id}`);
         if (response.status === 204) {
-            setEmployees(employees.filter((employee) => employee.id === id));
+            setEmployees(employees.filter((employee) => employee.id !== id));
             alertService.success('Delete successfully');
         }
     };
@@ -107,7 +108,14 @@ const ListEmployee: React.FunctionComponent<Props> = () => {
                                     onChange={handleRowSelected}
                                 />
                             </td>
-                            <td>{employee.visa}</td>
+                            <td>
+                                <Link
+                                    to={`/employee/edit/${employee.id}`}
+                                    className='nav-link'
+                                >
+                                    {employee.visa}
+                                </Link>
+                            </td>
                             <td>{employee.firstName}</td>
                             <td>{employee.lastName}</td>
                             <td>{employee.birthDate}</td>

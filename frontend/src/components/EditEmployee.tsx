@@ -1,20 +1,47 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router';
+import React, { useState, useEffect } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import API from '../api';
 import { alertService } from '../service/alertService';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
+import Employee from '../model/Employee';
+
+interface ParamTypes {
+    action: string;
+    id?: string;
+}
+
 export interface Props {}
 
 const EditEmployee: React.FunctionComponent<Props> = () => {
     const history = useHistory();
+    const { action, id } = useParams<ParamTypes>();
 
     const [visa, setVisa] = useState<string>('');
     const [firstName, setFirstName] = useState<string>('');
     const [lastName, setLastName] = useState<string>('');
     const [birthDate, setBirthDate] = useState<Date | null>(null);
+
+    useEffect(() => {
+        if (action === 'edit') {
+            getEmployeeById();
+        }
+    }, [action, id]);
+
+    const getEmployeeById = async () => {
+        const response = await API.get<Employee>(`/employee/${id}`);
+        if (response.status === 200) {
+            const { data } = response;
+            setVisa(data.visa);
+            setFirstName(data.firstName);
+            setLastName(data.lastName);
+            if (data.birthDate) {
+                setBirthDate(new Date(data.birthDate));
+            }
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,10 +54,20 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         };
 
         try {
-            const response = await API.post('employee', data);
-            if (response.status === 201) {
-                alertService.success('Save successfully');
+            if (action === 'new') {
+                const response = await API.post('employee', data);
+                if (response.status === 201) {
+                    alertService.success('Save successfully');
+                }
             }
+
+            if (action === 'edit') {
+                const response = await API.put(`employee/${id}`, data);
+                if (response.status === 200) {
+                    alertService.success('Save successfully');
+                }
+            }
+
             resetFormData();
         } catch (err) {
             alertService.error(err.response.data.errors[0], {
@@ -54,7 +91,9 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
     return (
         <div className='container-fluid'>
             <div className='row mt-3 mb-5 border-bottom'>
-                <h5 className='mb-2'>New Employee</h5>
+                <h5 className='mb-2'>
+                    {action === 'new' ? 'New' : 'Edit'} Employee
+                </h5>
             </div>
             <form onSubmit={handleSubmit}>
                 <div className='row mb-3'>
@@ -144,7 +183,7 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                         Cancel
                     </button>
                     <button className='btn btn-primary' type='submit'>
-                        Create employee
+                        {action === 'new' ? 'Create' : 'Save'}
                     </button>
                 </div>
             </form>
