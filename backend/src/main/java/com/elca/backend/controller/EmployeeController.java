@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.elca.backend.dto.EmployeeDto;
@@ -39,42 +41,43 @@ public class EmployeeController {
     private EmployeeRepository employeeRepository;
 
     @GetMapping
+    @ResponseBody
     @Operation(summary = "Get all employees")
-    public ResponseEntity<List<Employee>> getAllEmployees() {
-        List<Employee> employees = employeeRepository.findAll();
-        return new ResponseEntity<>(employees, HttpStatus.OK);
+    public List<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
     }
 
     @GetMapping("/{id}")
+    @ResponseBody
     @Operation(summary = "Get employee by id")
-    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) throws RecordNotFoundException {
+    public Employee getEmployeeById(@PathVariable Long id) throws RecordNotFoundException {
         Optional<Employee> employeeOptional = employeeRepository.findById(id);
         return employeeOptional
-                .map(employee -> new ResponseEntity<>(employee, HttpStatus.OK))
                 .orElseThrow(() -> new RecordNotFoundException("Employee not found with id: " + id));
     }
 
     @PostMapping
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new employee")
-    public ResponseEntity<Employee> createNewEmployee(@Valid @RequestBody EmployeeDto employeeDto)
+    public Employee createNewEmployee(@Valid @RequestBody EmployeeDto employeeDto)
             throws EmployeeVisaAlreadyExistsException {
-        Employee newEmployee = employeeService.createEmployee(employeeDto);
-        return new ResponseEntity<>(newEmployee, HttpStatus.CREATED);
+        return employeeService.createEmployee(employeeDto);
     }
 
     @PutMapping("/{id}")
+    @ResponseBody
     @Operation(summary = "Update employee")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDto employeeDto)
+    public Employee updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDto employeeDto)
             throws RecordNotFoundException, EmployeeVisaAlreadyExistsException {
-        Employee updatedEmployee = employeeService.updateEmployee(id, employeeDto);
-        return new ResponseEntity<>(updatedEmployee, HttpStatus.OK);
+        return employeeService.updateEmployee(id, employeeDto);
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete employee")
-    public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable Long id) {
+    public void deleteEmployee(@PathVariable Long id) {
         employeeRepository.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }
