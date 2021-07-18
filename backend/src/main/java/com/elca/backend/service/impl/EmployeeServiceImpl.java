@@ -19,18 +19,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeRepository employeeRepository;
 
     @Override
-    public void createEmployee(EmployeeDto employeeDto) throws EmployeeVisaAlreadyExistsException {
+    public Employee createEmployee(EmployeeDto employeeDto) throws EmployeeVisaAlreadyExistsException {
         boolean isVisaExisted = employeeRepository.existsEmployeeByVisa(employeeDto.getVisa());
         if (isVisaExisted) {
             throw new EmployeeVisaAlreadyExistsException("Given visa already existed", employeeDto.getVisa());
         }
 
         Employee employee = employeeDto.toEmployee();
-        employeeRepository.save(employee);
+        return employeeRepository.save(employee);
     }
 
     @Override
-    public void editEmployee(final Long id, final EmployeeDto employeeDto)
+    public Employee updateEmployee(final Long id, final EmployeeDto employeeDto)
             throws RecordNotFoundException, EmployeeVisaAlreadyExistsException {
         Optional<Employee> employeeOptional = employeeRepository.findById(id);
         if (!employeeOptional.isPresent()) {
@@ -42,9 +42,15 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new EmployeeVisaAlreadyExistsException("Given visa already existed", employeeDto.getVisa());
         }
 
-        Employee employee = employeeDto.toEmployee();
-        employee.setId(id);
-        employeeRepository.save(employee);
+        return employeeOptional
+                .map(employee -> {
+                    employee.setVisa(employeeDto.getVisa());
+                    employee.setFirstName(employeeDto.getFirstName());
+                    employee.setLastName(employeeDto.getLastName());
+                    employee.setBirthDate(employeeDto.getBirthDate());
+                    return employeeRepository.save(employee);
+                })
+                .orElse(null);
     }
 
 }

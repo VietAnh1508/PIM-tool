@@ -56,23 +56,23 @@ public class EmployeeController {
 
     @PostMapping
     @Operation(summary = "Create new employee")
-    public ResponseEntity<Void> createNewEmployee(@Valid @RequestBody EmployeeDto employeeDto)
+    public ResponseEntity<Employee> createNewEmployee(@Valid @RequestBody EmployeeDto employeeDto)
             throws EmployeeVisaAlreadyExistsException {
-        employeeService.createEmployee(employeeDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        Employee newEmployee = employeeService.createEmployee(employeeDto);
+        return new ResponseEntity<>(newEmployee, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Edit employee")
-    public ResponseEntity<Void> editEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDto employeeDto)
+    @Operation(summary = "Update employee")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDto employeeDto)
             throws RecordNotFoundException, EmployeeVisaAlreadyExistsException {
-        employeeService.editEmployee(id, employeeDto);
-        return new ResponseEntity<>(HttpStatus.OK);
+        Employee updatedEmployee = employeeService.updateEmployee(id, employeeDto);
+        return new ResponseEntity<>(updatedEmployee, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete employee")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable Long id) {
         employeeRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
