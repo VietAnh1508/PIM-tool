@@ -6,7 +6,7 @@ import { alertService } from '../service/alertService';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import Employee from '../model/Employee';
+import { Employee, EmployeeError } from '../model/Employee';
 
 interface ParamTypes {
     action: string;
@@ -23,6 +23,12 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
     const [firstName, setFirstName] = useState<string>('');
     const [lastName, setLastName] = useState<string>('');
     const [birthDate, setBirthDate] = useState<Date | null>(null);
+    const [errors, setErrors] = useState<EmployeeError>({
+        visa: '',
+        firstName: '',
+        lastName: ''
+    });
+    const [formInvalid, setFormInvalid] = useState<boolean>(false);
 
     useEffect(() => {
         if (action === 'edit') {
@@ -43,6 +49,38 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         }
     };
 
+    const validateValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id } = e.target;
+        let isError = { ...errors };
+        let isFormInvalid = false;
+
+        switch (id) {
+            case 'visa':
+                if (visa.length === 0) {
+                    isError.visa = 'VISA is required';
+                    isFormInvalid = true;
+                }
+                break;
+            case 'firstName':
+                if (firstName.length === 0) {
+                    isError.firstName = 'First name is required';
+                    isFormInvalid = true;
+                }
+                break;
+            case 'lastName':
+                if (lastName.length === 0) {
+                    isError.lastName = 'Last name is required';
+                    isFormInvalid = true;
+                }
+                break;
+            default:
+                break;
+        }
+
+        setErrors(isError);
+        setFormInvalid(isFormInvalid);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -54,6 +92,10 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         };
 
         try {
+            if (formInvalid) {
+                return;
+            }
+
             if (action === 'new') {
                 const response = await API.post('employee', data);
                 if (response.status === 201) {
@@ -98,18 +140,25 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
             <form onSubmit={handleSubmit}>
                 <div className='row mb-3'>
                     <label htmlFor='visa' className='col-sm-2 col-form-label'>
-                        VISA
+                        VISA <span className='text-danger'>*</span>
                     </label>
                     <div className='col-sm-3'>
                         <input
                             type='text'
-                            className='form-control'
-                            id='projectNumber'
+                            className={`form-control ${
+                                errors.visa.length > 0 ? 'is-invalid' : ''
+                            }`}
+                            id='visa'
                             value={visa}
                             onChange={(
                                 e: React.ChangeEvent<HTMLInputElement>
                             ) => setVisa(e.target.value)}
+                            onBlur={validateValue}
+                            required
                         />
+                        {errors.visa.length > 0 && (
+                            <small className='text-danger'>{errors.visa}</small>
+                        )}
                     </div>
                 </div>
                 <div className='row mb-3'>
@@ -117,18 +166,27 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                         htmlFor='firstName'
                         className='col-sm-2 col-form-label'
                     >
-                        First name
+                        First name <span className='text-danger'>*</span>
                     </label>
                     <div className='col-sm-5'>
                         <input
                             type='text'
-                            className='form-control'
+                            className={`form-control ${
+                                errors.firstName.length > 0 ? 'is-invalid' : ''
+                            }`}
                             id='firstName'
                             value={firstName}
                             onChange={(
                                 e: React.ChangeEvent<HTMLInputElement>
                             ) => setFirstName(e.target.value)}
+                            onBlur={validateValue}
+                            required
                         />
+                        {errors.firstName.length > 0 && (
+                            <small className='text-danger'>
+                                {errors.firstName}
+                            </small>
+                        )}
                     </div>
                 </div>
                 <div className='row mb-3'>
@@ -136,18 +194,27 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                         htmlFor='lastName'
                         className='col-sm-2 col-form-label'
                     >
-                        Last name
+                        Last name <span className='text-danger'>*</span>
                     </label>
                     <div className='col-sm-5'>
                         <input
                             type='text'
-                            className='form-control'
+                            className={`form-control ${
+                                errors.lastName.length > 0 ? 'is-invalid' : ''
+                            }`}
                             id='lastName'
                             value={lastName}
                             onChange={(
                                 e: React.ChangeEvent<HTMLInputElement>
                             ) => setLastName(e.target.value)}
+                            onBlur={validateValue}
+                            required
                         />
+                        {errors.lastName.length > 0 && (
+                            <small className='text-danger'>
+                                {errors.lastName}
+                            </small>
+                        )}
                     </div>
                 </div>
                 <div className='row mb-3'>
@@ -168,7 +235,9 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                                     showYearDropdown
                                     dropdownMode='select'
                                     selected={birthDate}
-                                    onChange={(date: any) => setBirthDate(date)}
+                                    onChange={(date: Date) =>
+                                        setBirthDate(date)
+                                    }
                                 />
                             </div>
                         </div>

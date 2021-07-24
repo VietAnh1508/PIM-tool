@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import API from '../api';
 import { alertService } from '../service/alertService';
 
-import Employee from '../model/Employee';
+import { Employee } from '../model/Employee';
 
 export interface Props {}
 
