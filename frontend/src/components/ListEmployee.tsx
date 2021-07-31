@@ -118,7 +118,11 @@ const ListEmployee: React.FunctionComponent<Props> = () => {
                             </td>
                             <td>{employee.firstName}</td>
                             <td>{employee.lastName}</td>
-                            <td>{employee.birthDate}</td>
+                            <td>
+                                {employee.birthDate != null
+                                    ? employee.birthDate.toLocaleString('vi-VN')
+                                    : ''}
+                            </td>
                             <td className='text-center'>
                                 <button
                                     className='btn btn-link text-danger'
