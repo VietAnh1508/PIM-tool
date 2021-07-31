@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.elca.backend.dto.GroupDto;
+import com.elca.backend.dto.SimpleGroupDto;
 import com.elca.backend.exception.RecordNotFoundException;
 import com.elca.backend.model.Group;
 import com.elca.backend.repository.GroupRepository;
@@ -41,6 +42,13 @@ public class GroupController {
 	@Operation(summary = "Get all groups")
 	public List<Group> getAllGroups() {
 		return groupRepository.findAll();
+	}
+
+	@GetMapping("/simple")
+	@ResponseBody
+	@Operation(summary = "Get all groups with simple data")
+	public List<SimpleGroupDto> getAllGroupWithSimpleData() {
+		return groupRepository.getSimpleGroupsBy();
 	}
 
 	@GetMapping("/{id}")
