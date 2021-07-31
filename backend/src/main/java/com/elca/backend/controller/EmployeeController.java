@@ -3,7 +3,6 @@ package com.elca.backend.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -50,15 +49,8 @@ public class EmployeeController {
     @GetMapping("/leaders")
     @ResponseBody
     @Operation(summary = "Get all employees for leader")
-    public List<LeaderDto> getLeaders() {
-        List<Leader> leaders = employeeRepository.findAllBy();
-        return leaders.stream().map(leader -> {
-            LeaderDto dto = new LeaderDto();
-            dto.setId(leader.getId());
-            dto.setFirstName(leader.getFirstName());
-            dto.setLastName(leader.getLastName());
-            return dto;
-        }).collect(Collectors.toList());
+    public List<Leader> getLeaders() {
+        return employeeRepository.getLeaderBy();
     }
 
     @GetMapping("/{id}")

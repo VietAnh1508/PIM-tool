@@ -18,6 +18,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     boolean existsEmployeeByVisa(String visa);
 
-    List<Leader> findAllBy();
+    List<Leader> getLeaderBy();
 
 }
