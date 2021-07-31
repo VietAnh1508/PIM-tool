@@ -1,7 +1,9 @@
 package com.elca.backend.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -22,6 +24,7 @@ import com.elca.backend.exception.EmployeeVisaAlreadyExistsException;
 import com.elca.backend.exception.RecordNotFoundException;
 import com.elca.backend.model.Employee;
 import com.elca.backend.repository.EmployeeRepository;
+import com.elca.backend.dto.Leader;
 import com.elca.backend.service.EmployeeService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +45,20 @@ public class EmployeeController {
     @Operation(summary = "Get all employees")
     public List<Employee> getAllEmployees() {
         return employeeRepository.findAll();
+    }
+
+    @GetMapping("/leaders")
+    @ResponseBody
+    @Operation(summary = "Get all employees for leader")
+    public List<LeaderDto> getLeaders() {
+        List<Leader> leaders = employeeRepository.findAllBy();
+        return leaders.stream().map(leader -> {
+            LeaderDto dto = new LeaderDto();
+            dto.setId(leader.getId());
+            dto.setFirstName(leader.getFirstName());
+            dto.setLastName(leader.getLastName());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")

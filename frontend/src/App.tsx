@@ -7,6 +7,8 @@ import ListProject from './components/ListProject';
 import EditProject from './components/EditProject';
 import ListEmployee from './components/ListEmployee';
 import EditEmployee from './components/EditEmployee';
+import ListGroup from './components/ListGroup';
+import EditGroup from './components/EditGroup';
 
 function App() {
     return (
@@ -22,10 +24,7 @@ function App() {
                     <div className='col-10'>
                         <Alert />
                         <Switch>
-                            <Route path='/project/new'>
-                                <EditProject />
-                            </Route>
-                            <Route path='/project/edit'>
+                            <Route path='/project/:action/:id?'>
                                 <EditProject />
                             </Route>
                             <Route path='/project'>
@@ -36,6 +35,12 @@ function App() {
                             </Route>
                             <Route path='/employee'>
                                 <ListEmployee />
+                            </Route>
+                            <Route path='/group/:action/:id?'>
+                                <EditGroup />
+                            </Route>
+                            <Route path='/group'>
+                                <ListGroup />
                             </Route>
                         </Switch>
                     </div>
