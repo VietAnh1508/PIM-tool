@@ -4,7 +4,6 @@ import API from '../api';
 import { alertService } from '../service/alertService';
 
 import { Group, GroupError } from '../model/Group';
-import { Employee } from '../model/Employee';
 import { Leader } from '../model/Leader';
 
 interface ParamTypes {
