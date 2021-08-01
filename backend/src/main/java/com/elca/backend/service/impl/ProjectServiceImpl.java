@@ -71,6 +71,7 @@ public class ProjectServiceImpl implements ProjectService {
                     project.setCustomer(projectDto.getCustomer());
                     project.setGroup(group);
                     project.setName(projectDto.getName());
+                    project.setStatus(projectDto.getStatus());
                     project.setStartDate(projectDto.getStartDate());
                     project.setEndDate(projectDto.getEndDate());
                     return projectRepository.save(project);

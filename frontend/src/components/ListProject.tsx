@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import API from '../api';
 import { alertService } from '../service/alertService';
 
-import { Project } from '../model/Project';
+import { Project, ProjectStatus } from '../model/Project';
 
 export interface Props {}
 
@@ -13,9 +13,13 @@ const ListProject: React.FunctionComponent<Props> = () => {
     const history = useHistory();
 
     const [projects, setProjects] = useState<Project[]>([]);
+    const [projectStatusList, setProjectStatusList] = useState<ProjectStatus[]>(
+        []
+    );
 
     useEffect(() => {
         getProjectData();
+        getPreDefinedStatus();
     }, []);
 
     const getProjectData = async () => {
@@ -36,6 +40,23 @@ const ListProject: React.FunctionComponent<Props> = () => {
 
             setProjects(result);
         }
+    };
+
+    const getPreDefinedStatus = async () => {
+        const response = await API.get<ProjectStatus[]>(
+            'project/pre-defined-status'
+        );
+        if (response.status === 200) {
+            const result: ProjectStatus[] = response.data.map((item) => ({
+                key: item.key,
+                label: item.label
+            }));
+            setProjectStatusList(result);
+        }
+    };
+
+    const getStatusName = (key: string) => {
+        return projectStatusList.find((status) => status.key === key)?.label;
     };
 
     const handleNewBtnClick = () => {
@@ -122,7 +143,7 @@ const ListProject: React.FunctionComponent<Props> = () => {
                                 </Link>
                             </td>
                             <td>{project.name}</td>
-                            <td>{project.status}</td>
+                            <td>{getStatusName(project.status)}</td>
                             <td>{project.customer}</td>
                             <td>
                                 {project.startDate != null
@@ -130,12 +151,16 @@ const ListProject: React.FunctionComponent<Props> = () => {
                                     : ''}
                             </td>
                             <td className='text-center'>
-                                <button
-                                    className='btn btn-link text-danger'
-                                    onClick={() => handleDeleteItem(project.id)}
-                                >
-                                    <i className='bi bi-trash'></i>
-                                </button>
+                                {project.status === 'NEW' && (
+                                    <button
+                                        className='btn btn-link text-danger'
+                                        onClick={() =>
+                                            handleDeleteItem(project.id)
+                                        }
+                                    >
+                                        <i className='bi bi-trash'></i>
+                                    </button>
+                                )}
                             </td>
                         </tr>
                     ))}
