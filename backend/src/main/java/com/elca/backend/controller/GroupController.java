@@ -1,7 +1,6 @@
 package com.elca.backend.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.elca.backend.dto.GroupDto;
 import com.elca.backend.dto.SimpleGroupDto;
+import com.elca.backend.exception.BadRequestException;
 import com.elca.backend.exception.RecordNotFoundException;
 import com.elca.backend.model.Group;
 import com.elca.backend.repository.GroupRepository;
@@ -55,23 +55,21 @@ public class GroupController {
 	@ResponseBody
 	@Operation(summary = "Get group by id")
 	public Group getGroupById(@PathVariable Long id) throws RecordNotFoundException {
-		Optional<Group> groupOptional = groupRepository.findById(id);
-		return groupOptional
-				.orElseThrow(() -> new RecordNotFoundException("Group not found with id: " + id));
+		return groupService.getGroupById(id);
 	}
 
 	@PostMapping
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	@Operation(summary = "Create new group")
-	public Group createNewGroup(@Valid @RequestBody GroupDto groupDto) throws RecordNotFoundException {
+	public Group createNewGroup(@Valid @RequestBody GroupDto groupDto) throws BadRequestException {
 		return groupService.createGroup(groupDto);
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update group")
 	public Group updateGroup(@PathVariable Long id, @Valid @RequestBody GroupDto groupDto)
-			throws RecordNotFoundException {
+			throws BadRequestException {
 		return groupService.updateGroup(id, groupDto);
 	}
 

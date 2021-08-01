@@ -5,11 +5,12 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.elca.backend.dto.GroupDto;
+import com.elca.backend.exception.BadRequestException;
 import com.elca.backend.exception.RecordNotFoundException;
 import com.elca.backend.model.Employee;
 import com.elca.backend.model.Group;
-import com.elca.backend.repository.EmployeeRepository;
 import com.elca.backend.repository.GroupRepository;
+import com.elca.backend.service.EmployeeService;
 import com.elca.backend.service.GroupService;
 
 import lombok.AllArgsConstructor;
@@ -19,35 +20,45 @@ import lombok.AllArgsConstructor;
 public class GroupServiceImpl implements GroupService {
 
 	private final GroupRepository groupRepository;
-	private final EmployeeRepository employeeRepository;
+	private final EmployeeService employeeService;
 
 	@Override
-	public Group createGroup(final GroupDto groupDto) throws RecordNotFoundException {
-		Optional<Employee> employeeOptional = employeeRepository.findById(groupDto.getLeaderId());
-		if (!employeeOptional.isPresent()) {
-			throw new RecordNotFoundException("Leader not found with id: " + groupDto.getLeaderId());
+	public Group getGroupById(final Long id) throws RecordNotFoundException {
+		Optional<Group> groupOptional = groupRepository.findById(id);
+		return groupOptional.orElseThrow(() -> new RecordNotFoundException("Given group id is not exists"));
+	}
+
+	@Override
+	public Group createGroup(final GroupDto groupDto) throws BadRequestException {
+		Employee employee;
+		try {
+			employee = employeeService.getEmployeeById(groupDto.getLeaderId());
+		} catch (RecordNotFoundException e) {
+			throw new BadRequestException(e.getMessage());
 		}
 
-		Group newGroup = groupDto.toGroup(employeeOptional.get());
+		Group newGroup = groupDto.toGroup(employee);
 		return groupRepository.save(newGroup);
 	}
 
 	@Override
-	public Group updateGroup(final Long id, final GroupDto groupDto) throws RecordNotFoundException {
+	public Group updateGroup(final Long id, final GroupDto groupDto) throws BadRequestException {
 		Optional<Group> groupOptional = groupRepository.findById(id);
 		if (!groupOptional.isPresent()) {
-			throw new RecordNotFoundException("Group not found with id: " + id);
+			throw new BadRequestException("Group not found with id: " + id);
 		}
 
-		Optional<Employee> employeeOptional = employeeRepository.findById(groupDto.getLeaderId());
-		if (!employeeOptional.isPresent()) {
-			throw new RecordNotFoundException("Leader not found with id: " + groupDto.getLeaderId());
+		Employee leader;
+		try {
+			leader = employeeService.getEmployeeById(groupDto.getLeaderId());
+		} catch (RecordNotFoundException e) {
+			throw new BadRequestException(e.getMessage());
 		}
 
 		return groupOptional
 				.map(group -> {
 					group.setName(groupDto.getName());
-					group.setLeader(employeeOptional.get());
+					group.setLeader(leader);
 					return groupRepository.save(group);
 				})
 				.orElse(null);
