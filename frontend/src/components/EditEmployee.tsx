@@ -7,8 +7,6 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 import { Employee, EmployeeError } from '../model/Employee';
-// import FormField from '../model/FormField';
-// import FormElement from './FormElements/FormElement';
 
 interface ParamTypes {
     action: string;
@@ -21,8 +19,6 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
     const history = useHistory();
     const { action, id } = useParams<ParamTypes>();
 
-    // const [formFields, setFormFields] = useState<FormField[]>([]);
-
     const [visa, setVisa] = useState<string>('');
     const [firstName, setFirstName] = useState<string>('');
     const [lastName, setLastName] = useState<string>('');
@@ -33,19 +29,6 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         lastName: ''
     });
     const [formInvalid, setFormInvalid] = useState<boolean>(false);
-
-    // useEffect(() => {
-    //     getEmployeeForm();
-    // }, []);
-
-    // const getEmployeeForm = async () => {
-    //     const response = await API.get<FormField[]>(`/employee/form-fields`);
-    //     if (response.status === 200) {
-    //         const { data } = response;
-    //         console.log(data);
-    //         setFormFields(data);
-    //     }
-    // };
 
     useEffect(() => {
         if (action === 'edit') {
@@ -66,18 +49,39 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         }
     };
 
-    const validateValue = () => {
-        let clonedErrors = { ...errors };
+    const validateValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id } = e.target;
+        let isError = { ...errors };
 
-        clonedErrors.visa = visa.length > 0 ? '' : 'VISA is required';
-        clonedErrors.firstName =
-            firstName.length > 0 ? '' : 'First name is required';
-        clonedErrors.lastName =
-            lastName.length > 0 ? '' : 'Last name is required';
+        switch (id) {
+            case 'visa':
+                if (visa.length === 0) {
+                    isError.visa = 'VISA is required';
+                } else {
+                    isError.visa = '';
+                }
+                break;
+            case 'firstName':
+                if (firstName.length === 0) {
+                    isError.firstName = 'First name is required';
+                } else {
+                    isError.firstName = '';
+                }
+                break;
+            case 'lastName':
+                if (lastName.length === 0) {
+                    isError.lastName = 'Last name is required';
+                } else {
+                    isError.lastName = '';
+                }
+                break;
+            default:
+                break;
+        }
 
-        setErrors(clonedErrors);
+        setErrors(isError);
 
-        let isFormInvalid = Object.values(clonedErrors).some(
+        let isFormInvalid = Object.values(isError).some(
             (field) => field.length > 0
         );
         setFormInvalid(isFormInvalid);
@@ -85,10 +89,6 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (formInvalid) {
-            return;
-        }
 
         const data = {
             visa,
@@ -98,6 +98,10 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         };
 
         try {
+            if (formInvalid) {
+                return;
+            }
+
             if (action === 'new') {
                 const response = await API.post('employee', data);
                 if (response.status === 201) {
@@ -140,19 +144,6 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                 </h5>
             </div>
             <form onSubmit={handleSubmit}>
-                {/* {(formFields || []).map((field) => {
-                    return (
-                        <div className='row mb-3' key={field.id}>
-                            <FormElement
-                                id={field.id}
-                                type={field.type}
-                                label={field.label}
-                                mandatory={field.mandatory}
-                                width={field.width}
-                            />
-                        </div>
-                    );
-                })} */}
                 <div className='row mb-3'>
                     <label htmlFor='visa' className='col-sm-2 col-form-label'>
                         VISA <span className='text-danger'>*</span>
