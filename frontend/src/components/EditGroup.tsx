@@ -53,32 +53,15 @@ const EditGroup: React.FunctionComponent<Props> = () => {
         }
     };
 
-    const validateValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id } = e.target;
-        let isError = { ...errors };
+    const validateValue = () => {
+        let clonedErrors = { ...errors };
 
-        switch (id) {
-            case 'name':
-                if (name.length === 0) {
-                    isError.name = 'Group name is required';
-                } else {
-                    isError.name = '';
-                }
-                break;
-            case 'leader':
-                if (leaderId === -1) {
-                    isError.leader = 'Please select a leader';
-                } else {
-                    isError.leader = '';
-                }
-                break;
-            default:
-                break;
-        }
+        clonedErrors.name = name.length > 0 ? '' : 'Group name is required';
+        clonedErrors.leader = leaderId !== -1 ? '' : 'Please select a leader';
 
-        setErrors(isError);
+        setErrors(clonedErrors);
 
-        let isFormInvalid = Object.values(isError).some(
+        let isFormInvalid = Object.values(clonedErrors).some(
             (field) => field.length > 0
         );
         setFormInvalid(isFormInvalid);
@@ -87,16 +70,16 @@ const EditGroup: React.FunctionComponent<Props> = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (formInvalid) {
+            return;
+        }
+
         const data = {
             name,
             leaderId
         };
 
         try {
-            if (formInvalid) {
-                return;
-            }
-
             if (action === 'new') {
                 const response = await API.post('group', data);
                 if (response.status === 201) {
