@@ -49,39 +49,18 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         }
     };
 
-    const validateValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id } = e.target;
-        let isError = { ...errors };
+    const validateValue = () => {
+        let clonedErrors = { ...errors };
 
-        switch (id) {
-            case 'visa':
-                if (visa.length === 0) {
-                    isError.visa = 'VISA is required';
-                } else {
-                    isError.visa = '';
-                }
-                break;
-            case 'firstName':
-                if (firstName.length === 0) {
-                    isError.firstName = 'First name is required';
-                } else {
-                    isError.firstName = '';
-                }
-                break;
-            case 'lastName':
-                if (lastName.length === 0) {
-                    isError.lastName = 'Last name is required';
-                } else {
-                    isError.lastName = '';
-                }
-                break;
-            default:
-                break;
-        }
+        clonedErrors.visa = visa.length > 0 ? '' : 'VISA is required';
+        clonedErrors.firstName =
+            firstName.length > 0 ? '' : 'First name is required';
+        clonedErrors.lastName =
+            lastName.length > 0 ? '' : 'Last name is required';
 
-        setErrors(isError);
+        setErrors(clonedErrors);
 
-        let isFormInvalid = Object.values(isError).some(
+        let isFormInvalid = Object.values(clonedErrors).some(
             (field) => field.length > 0
         );
         setFormInvalid(isFormInvalid);
@@ -89,6 +68,10 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (formInvalid) {
+            return;
+        }
 
         const data = {
             visa,
@@ -98,10 +81,6 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         };
 
         try {
-            if (formInvalid) {
-                return;
-            }
-
             if (action === 'new') {
                 const response = await API.post('employee', data);
                 if (response.status === 201) {

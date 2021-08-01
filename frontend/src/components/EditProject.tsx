@@ -101,6 +101,10 @@ const EditProject: React.FunctionComponent<Props> = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (formInvalid) {
+            return;
+        }
+
         const data = {
             number: projectNumber,
             name: projectName,
@@ -112,10 +116,6 @@ const EditProject: React.FunctionComponent<Props> = () => {
         };
 
         try {
-            if (formInvalid) {
-                return;
-            }
-
             if (action === 'new') {
                 const response = await API.post('project', data);
                 if (response.status === 201) {
