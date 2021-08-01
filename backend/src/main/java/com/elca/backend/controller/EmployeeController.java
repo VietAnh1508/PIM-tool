@@ -2,7 +2,6 @@ package com.elca.backend.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -23,7 +22,6 @@ import com.elca.backend.exception.EmployeeVisaAlreadyExistsException;
 import com.elca.backend.exception.RecordNotFoundException;
 import com.elca.backend.model.Employee;
 import com.elca.backend.repository.EmployeeRepository;
-import com.elca.backend.dto.Leader;
 import com.elca.backend.service.EmployeeService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,9 +55,7 @@ public class EmployeeController {
     @ResponseBody
     @Operation(summary = "Get employee by id")
     public Employee getEmployeeById(@PathVariable Long id) throws RecordNotFoundException {
-        Optional<Employee> employeeOptional = employeeRepository.findById(id);
-        return employeeOptional
-                .orElseThrow(() -> new RecordNotFoundException("Employee not found with id: " + id));
+        return employeeService.getEmployeeById(id);
     }
 
     @PostMapping
@@ -75,7 +71,7 @@ public class EmployeeController {
     @ResponseBody
     @Operation(summary = "Update employee")
     public Employee updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDto employeeDto)
-            throws RecordNotFoundException, EmployeeVisaAlreadyExistsException {
+            throws BadRequestException, EmployeeVisaAlreadyExistsException {
         return employeeService.updateEmployee(id, employeeDto);
     }
 
@@ -84,6 +80,13 @@ public class EmployeeController {
     @Operation(summary = "Delete employee")
     public void deleteEmployee(@PathVariable Long id) {
         employeeRepository.deleteById(id);
+    }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete employees")
+    public void deleteEmployees(List<Long> ids) {
+        employeeRepository.deleteAllById(ids);
     }
 
 }
