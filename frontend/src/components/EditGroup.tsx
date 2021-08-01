@@ -56,19 +56,20 @@ const EditGroup: React.FunctionComponent<Props> = () => {
     const validateValue = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id } = e.target;
         let isError = { ...errors };
-        let isFormInvalid = false;
 
         switch (id) {
             case 'name':
                 if (name.length === 0) {
                     isError.name = 'Group name is required';
-                    isFormInvalid = true;
+                } else {
+                    isError.name = '';
                 }
                 break;
             case 'leader':
                 if (leaderId === -1) {
                     isError.leader = 'Please select a leader';
-                    isFormInvalid = true;
+                } else {
+                    isError.leader = '';
                 }
                 break;
             default:
@@ -76,6 +77,10 @@ const EditGroup: React.FunctionComponent<Props> = () => {
         }
 
         setErrors(isError);
+
+        let isFormInvalid = Object.values(isError).some(
+            (field) => field.length > 0
+        );
         setFormInvalid(isFormInvalid);
     };
 

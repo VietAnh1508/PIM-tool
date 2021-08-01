@@ -52,25 +52,27 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
     const validateValue = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id } = e.target;
         let isError = { ...errors };
-        let isFormInvalid = false;
 
         switch (id) {
             case 'visa':
                 if (visa.length === 0) {
                     isError.visa = 'VISA is required';
-                    isFormInvalid = true;
+                } else {
+                    isError.visa = '';
                 }
                 break;
             case 'firstName':
                 if (firstName.length === 0) {
                     isError.firstName = 'First name is required';
-                    isFormInvalid = true;
+                } else {
+                    isError.firstName = '';
                 }
                 break;
             case 'lastName':
                 if (lastName.length === 0) {
                     isError.lastName = 'Last name is required';
-                    isFormInvalid = true;
+                } else {
+                    isError.lastName = '';
                 }
                 break;
             default:
@@ -78,6 +80,10 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         }
 
         setErrors(isError);
+
+        let isFormInvalid = Object.values(isError).some(
+            (field) => field.length > 0
+        );
         setFormInvalid(isFormInvalid);
     };
 
@@ -230,6 +236,7 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                             </div>
                             <div className='col-sm-6'>
                                 <DatePicker
+                                    className='form-control'
                                     dateFormat='dd/MM/yyyy'
                                     showMonthDropdown
                                     showYearDropdown
