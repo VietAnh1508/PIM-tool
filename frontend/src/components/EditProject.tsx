@@ -34,6 +34,8 @@ const EditProject: React.FunctionComponent<Props> = () => {
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [formInvalid, setFormInvalid] = useState<boolean>(false);
 
+    const DATE_FORMAT = 'dd/MM/yyyy';
+
     useEffect(() => {
         getGroups();
         getPreDefinedStatus();
@@ -309,11 +311,15 @@ const EditProject: React.FunctionComponent<Props> = () => {
                                 <DatePicker
                                     todayButton='Today'
                                     className='form-control'
-                                    dateFormat='dd/MM/yyyy'
+                                    dateFormat={DATE_FORMAT}
                                     showMonthDropdown
                                     showYearDropdown
                                     dropdownMode='select'
                                     selected={startDate}
+                                    selectsStart
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    maxDate={endDate}
                                     onChange={(date: Date) =>
                                         setStartDate(date)
                                     }
@@ -335,11 +341,14 @@ const EditProject: React.FunctionComponent<Props> = () => {
                             <div className='col-sm-6'>
                                 <DatePicker
                                     className='form-control'
-                                    dateFormat='dd/MM/yyyy'
+                                    dateFormat={DATE_FORMAT}
                                     showMonthDropdown
                                     showYearDropdown
                                     dropdownMode='select'
                                     selected={endDate}
+                                    selectsEnd
+                                    endDate={endDate}
+                                    minDate={startDate}
                                     onChange={(date: Date) => setEndDate(date)}
                                 />
                             </div>
