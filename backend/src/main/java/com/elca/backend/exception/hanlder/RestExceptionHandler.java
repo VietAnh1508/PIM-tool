@@ -1,8 +1,8 @@
 package com.elca.backend.exception.hanlder;
 
-import com.elca.backend.exception.RecordNotFoundException;
-import com.elca.backend.exception.model.ErrorResponse;
-import com.elca.backend.exception.EmployeeVisaAlreadyExistsException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.elca.backend.exception.BaseException;
+import com.elca.backend.exception.EmployeeVisaAlreadyExistsException;
+import com.elca.backend.exception.ProjectNumberAlreadyExistsException;
+import com.elca.backend.exception.RecordNotFoundException;
+import com.elca.backend.exception.model.ErrorResponse;
 
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
@@ -44,8 +47,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(EmployeeVisaAlreadyExistsException.class)
-    private ResponseEntity<ErrorResponse> handleEmployeeVisaAlreadyExistsException(EmployeeVisaAlreadyExistsException ex) {
+    @ExceptionHandler({EmployeeVisaAlreadyExistsException.class, ProjectNumberAlreadyExistsException.class})
+    private ResponseEntity<ErrorResponse> handleValueAlreadyExistsException(BaseException ex) {
         List<String> errors = new ArrayList<>();
         errors.add(ex.getLocalizedMessage());
         ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST, "Bad request", errors);

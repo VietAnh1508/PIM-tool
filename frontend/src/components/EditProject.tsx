@@ -1,35 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router';
+import { useHistory, useParams } from 'react-router-dom';
 import API from '../api';
+import { alertService } from '../service/alertService';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-export interface Props {}
+import { Project, ProjectStatus } from '../model/Project';
+import { GroupSimple } from '../model/GroupSimple';
 
-interface ProjectStatus {
-    key: string;
-    label: string;
+interface ParamTypes {
+    action: string;
+    id?: string;
 }
+
+export interface Props {}
 
 const EditProject: React.FunctionComponent<Props> = () => {
     const history = useHistory();
+    const { action, id } = useParams<ParamTypes>();
 
-    const [projectNumber, setProjectNumber] = useState<number>(0);
+    const [projectNumber, setProjectNumber] = useState<number | null>(null);
     const [projectName, setProjectName] = useState<string>('');
     const [customer, setCustomer] = useState<string>('');
-    const [group, setGroup] = useState<string>();
+    const [groupId, setGroupId] = useState<number>(-1);
+    const [groupList, setGroupList] = useState<GroupSimple[]>([]);
     const [memebers, setMembers] = useState<string[]>([]);
-    const [status, setStatus] = useState<string>();
+    const [status, setStatus] = useState<string>('');
     const [projectStatusList, setProjectStatusList] = useState<ProjectStatus[]>(
         []
     );
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
+    const [formInvalid, setFormInvalid] = useState<boolean>(false);
 
     useEffect(() => {
+        getGroups();
         getPreDefinedStatus();
     }, []);
+
+    const getGroups = async () => {
+        const response = await API.get<GroupSimple[]>('group/simple');
+        if (response.status === 200) {
+            const result: GroupSimple[] = response.data.map((item) => ({
+                id: item.id,
+                name: item.name
+            }));
+
+            result.unshift({
+                id: -1,
+                name: '-- Please select group --'
+            });
+
+            setGroupList(result);
+        }
+    };
 
     const getPreDefinedStatus = async () => {
         const response = await API.get<ProjectStatus[]>(
@@ -41,17 +66,30 @@ const EditProject: React.FunctionComponent<Props> = () => {
                 label: item.label
             }));
             setProjectStatusList(result);
+            setStatus(result[0].key);
         }
     };
 
-    const handleProjectNumberChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const projectNumber = Number(e.target.value);
-        if (isNaN(projectNumber)) {
-            console.log('invalid');
-        } else {
-            setProjectNumber(projectNumber);
+    useEffect(() => {
+        if (action === 'edit') {
+            getProjectById();
+        }
+    }, [action, id]);
+
+    const getProjectById = async () => {
+        const response = await API.get<Project>(`/project/${id}`);
+        if (response.status === 200) {
+            const { data } = response;
+            setProjectNumber(Number(data.projectNumber));
+            setProjectName(data.name);
+            setCustomer(data.customer);
+            setGroupId(data.group.id);
+            setMembers(data.members);
+            setStatus(data.status);
+            setStartDate(new Date(data.startDate));
+            if (data.endDate) {
+                setEndDate(new Date(data.endDate));
+            }
         }
     };
 
@@ -60,18 +98,42 @@ const EditProject: React.FunctionComponent<Props> = () => {
         setMembers(value.split(','));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('project number', projectNumber);
-        console.log('project name', projectName);
-        console.log('customer', customer);
-        console.log('group', group);
-        console.log('members', memebers?.join(', '));
-        console.log('status', status);
-        console.log('start date', startDate);
-        console.log('end date', endDate);
 
-        // TODO: send data to server
+        const data = {
+            number: projectNumber,
+            name: projectName,
+            groupId,
+            customer,
+            status,
+            startDate,
+            endDate
+        };
+
+        try {
+            if (formInvalid) {
+                return;
+            }
+
+            if (action === 'new') {
+                const response = await API.post('project', data);
+                if (response.status === 201) {
+                    alertService.success('Save successfully');
+                }
+            }
+
+            if (action === 'edit') {
+                const response = await API.put(`project/${id}`, data);
+                if (response.status === 200) {
+                    alertService.success('Save successfully');
+                }
+            }
+        } catch (err) {
+            alertService.error(err.response.data.errors[0], {
+                autoClose: false
+            });
+        }
 
         resetFormData();
     };
@@ -85,9 +147,9 @@ const EditProject: React.FunctionComponent<Props> = () => {
         setProjectNumber(0);
         setProjectName('');
         setCustomer('');
-        // TODO: reset group
+        setGroupId(-1);
         setMembers([]);
-        // TODO: reset status
+        setStatus('');
         setStartDate(null);
         setEndDate(null);
     };
@@ -95,7 +157,9 @@ const EditProject: React.FunctionComponent<Props> = () => {
     return (
         <div className='container-fluid'>
             <div className='row mt-3 mb-5 border-bottom'>
-                <h5 className='mb-2'>New project</h5>
+                <h5 className='mb-2'>
+                    {action === 'new' ? 'New' : 'Edit'} project
+                </h5>
             </div>
             <form onSubmit={handleSubmit}>
                 <div className='row mb-3'>
@@ -103,15 +167,20 @@ const EditProject: React.FunctionComponent<Props> = () => {
                         htmlFor='projectNumber'
                         className='col-sm-2 col-form-label'
                     >
-                        Project number
+                        Project number <span className='text-danger'>*</span>
                     </label>
                     <div className='col-sm-3'>
                         <input
                             type='text'
                             className='form-control'
                             id='projectNumber'
-                            value={projectNumber}
-                            onChange={handleProjectNumberChange}
+                            pattern='\d+'
+                            disabled={action === 'edit'}
+                            value={projectNumber || ''}
+                            onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>
+                            ) => setProjectNumber(Number(e.target.value))}
+                            required
                         />
                     </div>
                 </div>
@@ -120,7 +189,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
                         htmlFor='projectName'
                         className='col-sm-2 col-form-label'
                     >
-                        Project name
+                        Project name <span className='text-danger'>*</span>
                     </label>
                     <div className='col-sm-10'>
                         <input
@@ -131,6 +200,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
                             onChange={(
                                 e: React.ChangeEvent<HTMLInputElement>
                             ) => setProjectName(e.target.value)}
+                            required
                         />
                     </div>
                 </div>
@@ -139,7 +209,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
                         htmlFor='customer'
                         className='col-sm-2 col-form-label'
                     >
-                        Customer
+                        Customer <span className='text-danger'>*</span>
                     </label>
                     <div className='col-sm-10'>
                         <input
@@ -150,26 +220,35 @@ const EditProject: React.FunctionComponent<Props> = () => {
                             onChange={(
                                 e: React.ChangeEvent<HTMLInputElement>
                             ) => setCustomer(e.target.value)}
+                            required
                         />
                     </div>
                 </div>
                 <div className='row mb-3'>
                     <div className='col-sm-2'>
                         <label htmlFor='group' className='col-form-label'>
-                            Group
+                            Group <span className='text-danger'>*</span>
                         </label>
                     </div>
                     <div className='col-sm-3'>
                         <select
                             id='group'
                             className='form-select'
-                            value={group}
+                            value={groupId}
                             onChange={(e: React.FormEvent<HTMLSelectElement>) =>
-                                setGroup(e.currentTarget.value)
+                                setGroupId(Number(e.currentTarget.value))
                             }
+                            required
                         >
-                            <option>group1</option>
-                            <option>group2</option>
+                            {groupList.map((group) => (
+                                <option
+                                    key={`group-${group.id}`}
+                                    value={group.id}
+                                    disabled={group.id === -1}
+                                >
+                                    {group.name}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -193,7 +272,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
                 <div className='row mb-3'>
                     <div className='col-sm-2'>
                         <label htmlFor='status' className='col-form-label'>
-                            Status
+                            Status <span className='text-danger'>*</span>
                         </label>
                     </div>
                     <div className='col-sm-3'>
@@ -204,6 +283,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
                             onChange={(e: React.FormEvent<HTMLSelectElement>) =>
                                 setStatus(e.currentTarget.value)
                             }
+                            required
                         >
                             {projectStatusList.map((status) => (
                                 <option value={status.key} key={status.key}>
@@ -221,17 +301,23 @@ const EditProject: React.FunctionComponent<Props> = () => {
                                     htmlFor='startDate'
                                     className='col-form-label'
                                 >
-                                    Start date
+                                    Start date{' '}
+                                    <span className='text-danger'>*</span>
                                 </label>
                             </div>
                             <div className='col-sm-6'>
                                 <DatePicker
+                                    todayButton='Today'
+                                    className='form-control'
                                     dateFormat='dd/MM/yyyy'
                                     showMonthDropdown
                                     showYearDropdown
                                     dropdownMode='select'
                                     selected={startDate}
-                                    onChange={(date: any) => setStartDate(date)}
+                                    onChange={(date: Date) =>
+                                        setStartDate(date)
+                                    }
+                                    required
                                 />
                             </div>
                         </div>
@@ -248,12 +334,13 @@ const EditProject: React.FunctionComponent<Props> = () => {
                             </div>
                             <div className='col-sm-6'>
                                 <DatePicker
+                                    className='form-control'
                                     dateFormat='dd/MM/yyyy'
                                     showMonthDropdown
                                     showYearDropdown
                                     dropdownMode='select'
                                     selected={endDate}
-                                    onChange={(date: any) => setEndDate(date)}
+                                    onChange={(date: Date) => setEndDate(date)}
                                 />
                             </div>
                         </div>
@@ -268,7 +355,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
                         Cancel
                     </button>
                     <button className='btn btn-primary' type='submit'>
-                        Create project
+                        {action === 'new' ? 'Create' : 'Save'}
                     </button>
                 </div>
             </form>
