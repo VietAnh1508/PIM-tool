@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { useHistory, useParams } from 'react-router-dom';
-import API from '../api';
-import { alertService } from '../service/alertService';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import { Employee, EmployeeError } from '../model/Employee';
+import API from '../api';
+import { alertService } from '../service/alertService';
+
+import { Employee } from '../model/Employee';
 
 interface ParamTypes {
     action: string;
@@ -19,16 +21,13 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
     const history = useHistory();
     const { action, id } = useParams<ParamTypes>();
 
-    const [visa, setVisa] = useState<string>('');
-    const [firstName, setFirstName] = useState<string>('');
-    const [lastName, setLastName] = useState<string>('');
-    const [birthDate, setBirthDate] = useState<Date | null>(null);
-    const [errors, setErrors] = useState<EmployeeError>({
-        visa: '',
-        firstName: '',
-        lastName: ''
-    });
-    const [formInvalid, setFormInvalid] = useState<boolean>(false);
+    const {
+        register,
+        handleSubmit,
+        control,
+        formState: { errors },
+        setValue
+    } = useForm<Employee>();
 
     useEffect(() => {
         if (action === 'edit') {
@@ -40,46 +39,16 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
         const response = await API.get<Employee>(`/employee/${id}`);
         if (response.status === 200) {
             const { data } = response;
-            setVisa(data.visa);
-            setFirstName(data.firstName);
-            setLastName(data.lastName);
+            setValue('visa', data.visa);
+            setValue('firstName', data.firstName);
+            setValue('lastName', data.lastName);
             if (data.birthDate) {
-                setBirthDate(new Date(data.birthDate));
+                setValue('birthDate', new Date(data.birthDate));
             }
         }
     };
 
-    const validateValue = () => {
-        let clonedErrors = { ...errors };
-
-        clonedErrors.visa = visa.length > 0 ? '' : 'VISA is required';
-        clonedErrors.firstName =
-            firstName.length > 0 ? '' : 'First name is required';
-        clonedErrors.lastName =
-            lastName.length > 0 ? '' : 'Last name is required';
-
-        setErrors(clonedErrors);
-
-        let isFormInvalid = Object.values(clonedErrors).some(
-            (field) => field.length > 0
-        );
-        setFormInvalid(isFormInvalid);
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (formInvalid) {
-            return;
-        }
-
-        const data = {
-            visa,
-            firstName,
-            lastName,
-            birthDate
-        };
-
+    const onSubmit: SubmitHandler<Employee> = async (data) => {
         try {
             if (action === 'new') {
                 const response = await API.post('employee', data);
@@ -94,8 +63,6 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                     alertService.success('Save successfully');
                 }
             }
-
-            resetFormData();
         } catch (err) {
             alertService.error(err.response.data.errors[0], {
                 autoClose: false
@@ -104,15 +71,7 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
     };
 
     const handleCancel = () => {
-        resetFormData();
         history.goBack();
-    };
-
-    const resetFormData = () => {
-        setVisa('');
-        setFirstName('');
-        setLastName('');
-        setBirthDate(null);
     };
 
     return (
@@ -122,7 +81,7 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                     {action === 'new' ? 'New' : 'Edit'} Employee
                 </h5>
             </div>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <div className='row mb-3'>
                     <label htmlFor='visa' className='col-sm-2 col-form-label'>
                         VISA <span className='text-danger'>*</span>
@@ -131,18 +90,16 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                         <input
                             type='text'
                             className={`form-control ${
-                                errors.visa.length > 0 ? 'is-invalid' : ''
+                                errors.visa ? 'is-invalid' : ''
                             }`}
-                            id='visa'
-                            value={visa}
-                            onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                            ) => setVisa(e.target.value)}
-                            onBlur={validateValue}
-                            required
+                            {...register('visa', {
+                                required: 'VISA is required'
+                            })}
                         />
-                        {errors.visa.length > 0 && (
-                            <small className='text-danger'>{errors.visa}</small>
+                        {errors.visa && (
+                            <small className='text-danger'>
+                                {errors.visa.message}
+                            </small>
                         )}
                     </div>
                 </div>
@@ -157,26 +114,22 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                         <input
                             type='text'
                             className={`form-control ${
-                                errors.firstName.length > 0 ? 'is-invalid' : ''
+                                errors.firstName ? 'is-invalid' : ''
                             }`}
-                            id='firstName'
-                            value={firstName}
-                            onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                            ) => setFirstName(e.target.value)}
-                            onBlur={validateValue}
-                            required
+                            {...register('firstName', {
+                                required: 'First name is required'
+                            })}
                         />
-                        {errors.firstName.length > 0 && (
+                        {errors.firstName && (
                             <small className='text-danger'>
-                                {errors.firstName}
+                                {errors.firstName.message}
                             </small>
                         )}
                     </div>
                 </div>
                 <div className='row mb-3'>
                     <label
-                        htmlFor='lastName'
+                        htmlFor='firstName'
                         className='col-sm-2 col-form-label'
                     >
                         Last name <span className='text-danger'>*</span>
@@ -185,19 +138,15 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                         <input
                             type='text'
                             className={`form-control ${
-                                errors.lastName.length > 0 ? 'is-invalid' : ''
+                                errors.lastName ? 'is-invalid' : ''
                             }`}
-                            id='lastName'
-                            value={lastName}
-                            onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                            ) => setLastName(e.target.value)}
-                            onBlur={validateValue}
-                            required
+                            {...register('lastName', {
+                                required: 'Last name is required'
+                            })}
                         />
-                        {errors.lastName.length > 0 && (
+                        {errors.lastName && (
                             <small className='text-danger'>
-                                {errors.lastName}
+                                {errors.lastName.message}
                             </small>
                         )}
                     </div>
@@ -214,16 +163,22 @@ const EditEmployee: React.FunctionComponent<Props> = () => {
                                 </label>
                             </div>
                             <div className='col-sm-6'>
-                                <DatePicker
-                                    className='form-control'
-                                    dateFormat='dd/MM/yyyy'
-                                    showMonthDropdown
-                                    showYearDropdown
-                                    dropdownMode='select'
-                                    selected={birthDate}
-                                    onChange={(date: Date) =>
-                                        setBirthDate(date)
-                                    }
+                                <Controller
+                                    control={control}
+                                    name='birthDate'
+                                    render={({ field }) => (
+                                        <DatePicker
+                                            className='form-control'
+                                            dateFormat='dd/MM/yyyy'
+                                            showMonthDropdown
+                                            showYearDropdown
+                                            dropdownMode='select'
+                                            selected={field.value}
+                                            onChange={(date: Date) =>
+                                                field.onChange(date)
+                                            }
+                                        />
+                                    )}
                                 />
                             </div>
                         </div>
