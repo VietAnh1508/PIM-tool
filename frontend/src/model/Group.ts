@@ -1,13 +1,8 @@
-import { Employee } from './Employee';
+import { Leader } from './Leader';
 
 export interface Group {
     id: number;
     name: string;
-    leader: Employee;
+    leader: Leader;
     selected: boolean;
-}
-
-export interface GroupError {
-    name: string;
-    leader: string;
 }

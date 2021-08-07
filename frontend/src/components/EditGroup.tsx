@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { useHistory, useParams } from 'react-router-dom';
+
 import API from '../api';
 import { alertService } from '../service/alertService';
 
 import UrlParamsType from '../model/UrlParams';
-import { Group, GroupError } from '../model/Group';
+import { Group } from '../model/Group';
 import { Leader } from '../model/Leader';
 
 export interface Props {}
@@ -13,14 +15,14 @@ const EditGroup: React.FunctionComponent<Props> = () => {
     const history = useHistory();
     const { action, id } = useParams<UrlParamsType>();
 
-    const [name, setName] = useState<string>('');
-    const [leaderId, setLeaderId] = useState<number>(-1);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue
+    } = useForm<Group>();
+
     const [leaderList, setLeaderList] = useState<Leader[]>([]);
-    const [errors, setErrors] = useState<GroupError>({
-        name: '',
-        leader: ''
-    });
-    const [formInvalid, setFormInvalid] = useState<boolean>(false);
 
     useEffect(() => {
         getLeaderList();
@@ -31,6 +33,7 @@ const EditGroup: React.FunctionComponent<Props> = () => {
         if (response.status === 200) {
             const { data } = response;
             setLeaderList(data);
+            setValue('leader', data[0]);
         }
     };
 
@@ -44,53 +47,31 @@ const EditGroup: React.FunctionComponent<Props> = () => {
         const response = await API.get<Group>(`/group/${id}`);
         if (response.status === 200) {
             const { data } = response;
-            setName(data.name);
-            setLeaderId(data.leader.id);
+            setValue('name', data.name);
+            setValue('leader', data.leader);
         }
     };
 
-    const validateValue = () => {
-        let clonedErrors = { ...errors };
-
-        clonedErrors.name = name.length > 0 ? '' : 'Group name is required';
-        clonedErrors.leader = leaderId > -1 ? '' : 'Please select a leader';
-
-        setErrors(clonedErrors);
-
-        let isFormInvalid = Object.values(clonedErrors).some(
-            (field) => field.length > 0
-        );
-        setFormInvalid(isFormInvalid);
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (formInvalid) {
-            return;
-        }
-
-        const data = {
-            name,
-            leaderId
+    const onSubmit: SubmitHandler<Group> = async (data) => {
+        const payload = {
+            name: data.name,
+            leaderId: data.leader.id
         };
 
         try {
             if (action === 'new') {
-                const response = await API.post('group', data);
+                const response = await API.post('group', payload);
                 if (response.status === 201) {
                     alertService.success('Save successfully');
                 }
             }
 
             if (action === 'edit') {
-                const response = await API.put(`group/${id}`, data);
+                const response = await API.put(`group/${id}`, payload);
                 if (response.status === 200) {
                     alertService.success('Save successfully');
                 }
             }
-
-            resetFormData();
         } catch (err) {
             alertService.error(err.response.data.errors[0], {
                 autoClose: false
@@ -99,13 +80,7 @@ const EditGroup: React.FunctionComponent<Props> = () => {
     };
 
     const handleCancel = () => {
-        resetFormData();
         history.goBack();
-    };
-
-    const resetFormData = () => {
-        setName('');
-        setLeaderId(-1);
     };
 
     return (
@@ -115,27 +90,26 @@ const EditGroup: React.FunctionComponent<Props> = () => {
                     {action === 'new' ? 'New' : 'Edit'} Group
                 </h5>
             </div>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <div className='row mb-3'>
                     <label htmlFor='name' className='col-sm-2 col-form-label'>
                         Name <span className='text-danger'>*</span>
                     </label>
                     <div className='col-sm-3'>
                         <input
+                            id='name'
                             type='text'
                             className={`form-control ${
-                                errors.name.length > 0 ? 'is-invalid' : ''
+                                errors.name ? 'is-invalid' : ''
                             }`}
-                            id='name'
-                            value={name}
-                            onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                            ) => setName(e.target.value)}
-                            onBlur={validateValue}
-                            required
+                            {...register('name', {
+                                required: 'Group name is required'
+                            })}
                         />
-                        {errors.name.length > 0 && (
-                            <small className='text-danger'>{errors.name}</small>
+                        {errors.name && (
+                            <small className='text-danger'>
+                                {errors.name.message}
+                            </small>
                         )}
                     </div>
                 </div>
@@ -147,10 +121,7 @@ const EditGroup: React.FunctionComponent<Props> = () => {
                         <select
                             id='leader'
                             className='form-select'
-                            value={leaderId}
-                            onChange={(e: React.FormEvent<HTMLSelectElement>) =>
-                                setLeaderId(Number(e.currentTarget.value))
-                            }
+                            {...register('leader.id')}
                         >
                             {leaderList.map((leader) => (
                                 <option
@@ -159,9 +130,9 @@ const EditGroup: React.FunctionComponent<Props> = () => {
                                 >{`${leader.firstName} ${leader.lastName}`}</option>
                             ))}
                         </select>
-                        {errors.leader.length > 0 && (
+                        {errors.leader?.id && (
                             <small className='text-danger'>
-                                {errors.leader}
+                                {errors.leader.id?.message}
                             </small>
                         )}
                     </div>
