@@ -8,18 +8,14 @@ import 'react-datepicker/dist/react-datepicker.css';
 import API from '../api';
 import { alertService } from '../service/alertService';
 
+import UrlParamsType from '../model/UrlParams';
 import { Employee } from '../model/Employee';
-
-interface ParamTypes {
-    action: string;
-    id?: string;
-}
 
 export interface Props {}
 
 const EditEmployee: React.FunctionComponent<Props> = () => {
     const history = useHistory();
-    const { action, id } = useParams<ParamTypes>();
+    const { action, id } = useParams<UrlParamsType>();
 
     const {
         register,

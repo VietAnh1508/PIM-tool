@@ -3,19 +3,15 @@ import { useHistory, useParams } from 'react-router-dom';
 import API from '../api';
 import { alertService } from '../service/alertService';
 
+import UrlParamsType from '../model/UrlParams';
 import { Group, GroupError } from '../model/Group';
 import { Leader } from '../model/Leader';
-
-interface ParamTypes {
-    action: string;
-    id?: string;
-}
 
 export interface Props {}
 
 const EditGroup: React.FunctionComponent<Props> = () => {
     const history = useHistory();
-    const { action, id } = useParams<ParamTypes>();
+    const { action, id } = useParams<UrlParamsType>();
 
     const [name, setName] = useState<string>('');
     const [leaderId, setLeaderId] = useState<number>(-1);

@@ -6,19 +6,15 @@ import { alertService } from '../service/alertService';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
+import UrlParamsType from '../model/UrlParams';
 import { Project, ProjectStatus } from '../model/Project';
 import { GroupSimple } from '../model/GroupSimple';
-
-interface ParamTypes {
-    action: string;
-    id?: string;
-}
 
 export interface Props {}
 
 const EditProject: React.FunctionComponent<Props> = () => {
     const history = useHistory();
-    const { action, id } = useParams<ParamTypes>();
+    const { action, id } = useParams<UrlParamsType>();
 
     const [projectNumber, setProjectNumber] = useState<number | null>(null);
     const [projectName, setProjectName] = useState<string>('');
