@@ -6,9 +6,3 @@ export interface Employee {
     birthDate?: Date;
     selected: boolean;
 }
-
-export interface EmployeeError {
-    visa: string;
-    firstName: string;
-    lastName: string;
-}
