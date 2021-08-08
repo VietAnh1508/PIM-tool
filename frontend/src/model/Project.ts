@@ -6,10 +6,10 @@ export interface Project {
     name: string;
     customer: string;
     group: Group;
-    members: Array<string>;
+    members: string;
     status: string;
     startDate: Date;
-    endDate: Date;
+    endDate?: Date;
     selected: boolean;
 }
 
