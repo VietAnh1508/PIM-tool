@@ -1,6 +1,7 @@
 package com.elca.backend.dto;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -19,17 +20,18 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProjectDto {
 
-    @NotNull
     private Long number;
 
     @NotBlank
     private String name;
 
+    @NotBlank
+    private String customer;
+
     @NotNull
     private Long groupId;
 
-    @NotBlank
-    private String customer;
+    private Set<String> members;
 
     @NotNull
     private Project.Status status;
@@ -43,8 +45,8 @@ public class ProjectDto {
         return Project.builder()
                 .projectNumber(this.number)
                 .name(this.name)
-                .group(group)
                 .customer(this.customer)
+                .group(group)
                 .status(this.status)
                 .startDate(this.startDate)
                 .endDate(this.endDate)
