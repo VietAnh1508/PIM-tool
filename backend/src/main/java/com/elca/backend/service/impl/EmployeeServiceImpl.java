@@ -1,8 +1,8 @@
 package com.elca.backend.service.impl;
 
 import java.util.Optional;
+import java.util.Set;
 
-import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.elca.backend.dto.EmployeeDto;
@@ -26,6 +26,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         Optional<Employee> employeeOptional = employeeRepository.findById(id);
         return employeeOptional
                 .orElseThrow(() -> new RecordNotFoundException("Leader not found with id: " + id));
+    }
+
+    @Override
+    public Set<Employee> getEmployeeByListVisa(final Set<String> visa) {
+        return employeeRepository.getEmployeesByVisaIn(visa);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.elca.backend.service;
 
+import java.util.Set;
+
 import com.elca.backend.dto.EmployeeDto;
 import com.elca.backend.exception.BadRequestException;
 import com.elca.backend.exception.EmployeeVisaAlreadyExistsException;
@@ -9,6 +11,8 @@ import com.elca.backend.model.Employee;
 public interface EmployeeService {
 
 	Employee getEmployeeById(Long id) throws RecordNotFoundException;
+
+	Set<Employee> getEmployeeByListVisa(Set<String> visa);
 
     Employee createEmployee(EmployeeDto employeeDto) throws EmployeeVisaAlreadyExistsException;
 

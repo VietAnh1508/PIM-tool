@@ -94,17 +94,15 @@ const EditProject: React.FunctionComponent<Props> = () => {
         }
     };
 
-    const handleMemberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setValue('members', value.split(','));
-    };
-
     const onSubmit: SubmitHandler<Project> = async (data) => {
         const payload = {
             number: data.projectNumber,
             name: data.name,
-            groupId: data.group.id,
             customer: data.customer,
+            groupId: data.group.id,
+            members: data.members
+                .split(',')
+                .map((item) => item.replace(/\s/, '')),
             status: data.status,
             startDate: data.startDate,
             endDate: data.endDate
@@ -269,7 +267,6 @@ const EditProject: React.FunctionComponent<Props> = () => {
                             className='form-control'
                             id='members'
                             {...register('members')}
-                            onChange={handleMemberChange}
                         />
                     </div>
                 </div>
