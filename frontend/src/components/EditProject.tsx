@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { useHistory, useParams } from 'react-router-dom';
-import API from '../api';
-import { alertService } from '../service/alertService';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+
+import API from '../api';
+import { alertService } from '../service/alertService';
 
 import UrlParamsType from '../model/UrlParams';
 import { Project, ProjectStatus } from '../model/Project';
@@ -16,19 +18,19 @@ const EditProject: React.FunctionComponent<Props> = () => {
     const history = useHistory();
     const { action, id } = useParams<UrlParamsType>();
 
-    const [projectNumber, setProjectNumber] = useState<number | null>(null);
-    const [projectName, setProjectName] = useState<string>('');
-    const [customer, setCustomer] = useState<string>('');
-    const [groupId, setGroupId] = useState<number>(-1);
+    const {
+        register,
+        handleSubmit,
+        control,
+        formState: { errors },
+        getValues,
+        setValue
+    } = useForm<Project>();
+
     const [groupList, setGroupList] = useState<GroupSimple[]>([]);
-    const [memebers, setMembers] = useState<string[]>([]);
-    const [status, setStatus] = useState<string>('');
     const [projectStatusList, setProjectStatusList] = useState<ProjectStatus[]>(
         []
     );
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
-    const [formInvalid, setFormInvalid] = useState<boolean>(false);
 
     const DATE_FORMAT = 'dd/MM/yyyy';
 
@@ -51,6 +53,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
             });
 
             setGroupList(result);
+            setValue('group.id', result[0].id);
         }
     };
 
@@ -64,7 +67,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
                 label: item.label
             }));
             setProjectStatusList(result);
-            setStatus(result[0].key);
+            setValue('status', result[0].key);
         }
     };
 
@@ -78,51 +81,45 @@ const EditProject: React.FunctionComponent<Props> = () => {
         const response = await API.get<Project>(`/project/${id}`);
         if (response.status === 200) {
             const { data } = response;
-            setProjectNumber(Number(data.projectNumber));
-            setProjectName(data.name);
-            setCustomer(data.customer);
-            setGroupId(data.group.id);
-            setMembers(data.members);
-            setStatus(data.status);
-            setStartDate(new Date(data.startDate));
+            setValue('projectNumber', data.projectNumber);
+            setValue('name', data.name);
+            setValue('customer', data.customer);
+            setValue('group', data.group);
+            setValue('members', data.members);
+            setValue('status', data.status);
+            setValue('startDate', new Date(data.startDate));
             if (data.endDate) {
-                setEndDate(new Date(data.endDate));
+                setValue('endDate', new Date(data.endDate));
             }
         }
     };
 
     const handleMemberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setMembers(value.split(','));
+        setValue('members', value.split(','));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (formInvalid) {
-            return;
-        }
-
-        const data = {
-            number: projectNumber,
-            name: projectName,
-            groupId,
-            customer,
-            status,
-            startDate,
-            endDate
+    const onSubmit: SubmitHandler<Project> = async (data) => {
+        const payload = {
+            number: data.projectNumber,
+            name: data.name,
+            groupId: data.group.id,
+            customer: data.customer,
+            status: data.status,
+            startDate: data.startDate,
+            endDate: data.endDate
         };
 
         try {
             if (action === 'new') {
-                const response = await API.post('project', data);
+                const response = await API.post('project', payload);
                 if (response.status === 201) {
                     alertService.success('Save successfully');
                 }
             }
 
             if (action === 'edit') {
-                const response = await API.put(`project/${id}`, data);
+                const response = await API.put(`project/${id}`, payload);
                 if (response.status === 200) {
                     alertService.success('Save successfully');
                 }
@@ -132,24 +129,10 @@ const EditProject: React.FunctionComponent<Props> = () => {
                 autoClose: false
             });
         }
-
-        resetFormData();
     };
 
     const handleCancel = () => {
-        resetFormData();
         history.goBack();
-    };
-
-    const resetFormData = () => {
-        setProjectNumber(0);
-        setProjectName('');
-        setCustomer('');
-        setGroupId(-1);
-        setMembers([]);
-        setStatus('');
-        setStartDate(null);
-        setEndDate(null);
     };
 
     return (
@@ -159,7 +142,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
                     {action === 'new' ? 'New' : 'Edit'} project
                 </h5>
             </div>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <div className='row mb-3'>
                     <label
                         htmlFor='projectNumber'
@@ -170,16 +153,24 @@ const EditProject: React.FunctionComponent<Props> = () => {
                     <div className='col-sm-3'>
                         <input
                             type='text'
-                            className='form-control'
+                            className={`form-control ${
+                                errors.projectNumber ? 'is-invalid' : ''
+                            }`}
                             id='projectNumber'
-                            pattern='\d+'
                             disabled={action === 'edit'}
-                            value={projectNumber || ''}
-                            onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                            ) => setProjectNumber(Number(e.target.value))}
-                            required
+                            {...register('projectNumber', {
+                                required: 'Project number is required',
+                                pattern: {
+                                    value: /\d+/i,
+                                    message: 'Please enter number'
+                                }
+                            })}
                         />
+                        {errors.projectNumber && (
+                            <small className='text-danger'>
+                                {errors.projectNumber.message}
+                            </small>
+                        )}
                     </div>
                 </div>
                 <div className='row mb-3'>
@@ -192,14 +183,19 @@ const EditProject: React.FunctionComponent<Props> = () => {
                     <div className='col-sm-10'>
                         <input
                             type='text'
-                            className='form-control'
+                            className={`form-control ${
+                                errors.name ? 'is-invalid' : ''
+                            }`}
                             id='projectName'
-                            value={projectName}
-                            onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                            ) => setProjectName(e.target.value)}
-                            required
+                            {...register('name', {
+                                required: 'Project name is required'
+                            })}
                         />
+                        {errors.name && (
+                            <small className='text-danger'>
+                                {errors.name.message}
+                            </small>
+                        )}
                     </div>
                 </div>
                 <div className='row mb-3'>
@@ -212,14 +208,19 @@ const EditProject: React.FunctionComponent<Props> = () => {
                     <div className='col-sm-10'>
                         <input
                             type='text'
-                            className='form-control'
+                            className={`form-control ${
+                                errors.customer ? 'is-invalid' : ''
+                            }`}
                             id='customer'
-                            value={customer}
-                            onChange={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                            ) => setCustomer(e.target.value)}
-                            required
+                            {...register('customer', {
+                                required: 'Customer is required'
+                            })}
                         />
+                        {errors.customer && (
+                            <small className='text-danger'>
+                                {errors.customer.message}
+                            </small>
+                        )}
                     </div>
                 </div>
                 <div className='row mb-3'>
@@ -231,12 +232,12 @@ const EditProject: React.FunctionComponent<Props> = () => {
                     <div className='col-sm-3'>
                         <select
                             id='group'
-                            className='form-select'
-                            value={groupId}
-                            onChange={(e: React.FormEvent<HTMLSelectElement>) =>
-                                setGroupId(Number(e.currentTarget.value))
-                            }
-                            required
+                            className={`form-control ${
+                                errors.group ? 'is-invalid' : ''
+                            }`}
+                            {...register('group.id', {
+                                required: 'Please select group'
+                            })}
                         >
                             {groupList.map((group) => (
                                 <option
@@ -248,6 +249,11 @@ const EditProject: React.FunctionComponent<Props> = () => {
                                 </option>
                             ))}
                         </select>
+                        {errors.group?.id && (
+                            <small className='text-danger'>
+                                {errors.group.id.message}
+                            </small>
+                        )}
                     </div>
                 </div>
                 <div className='row mb-3'>
@@ -262,7 +268,7 @@ const EditProject: React.FunctionComponent<Props> = () => {
                             type='text'
                             className='form-control'
                             id='members'
-                            value={memebers}
+                            {...register('members')}
                             onChange={handleMemberChange}
                         />
                     </div>
@@ -276,12 +282,12 @@ const EditProject: React.FunctionComponent<Props> = () => {
                     <div className='col-sm-3'>
                         <select
                             id='status'
-                            className='form-select'
-                            value={status}
-                            onChange={(e: React.FormEvent<HTMLSelectElement>) =>
-                                setStatus(e.currentTarget.value)
-                            }
-                            required
+                            className={`form-control ${
+                                errors.status ? 'is-invalid' : ''
+                            }`}
+                            {...register('status', {
+                                required: 'Please select status'
+                            })}
                         >
                             {projectStatusList.map((status) => (
                                 <option value={status.key} key={status.key}>
@@ -289,6 +295,11 @@ const EditProject: React.FunctionComponent<Props> = () => {
                                 </option>
                             ))}
                         </select>
+                        {errors.status && (
+                            <small className='text-danger'>
+                                {errors.status.message}
+                            </small>
+                        )}
                     </div>
                 </div>
                 <div className='row mb-3'>
@@ -299,28 +310,43 @@ const EditProject: React.FunctionComponent<Props> = () => {
                                     htmlFor='startDate'
                                     className='col-form-label'
                                 >
-                                    Start date{' '}
-                                    <span className='text-danger'>*</span>
+                                    Start date
+                                    <span className='text-danger'> *</span>
                                 </label>
                             </div>
                             <div className='col-sm-6'>
-                                <DatePicker
-                                    todayButton='Today'
-                                    className='form-control'
-                                    dateFormat={DATE_FORMAT}
-                                    showMonthDropdown
-                                    showYearDropdown
-                                    dropdownMode='select'
-                                    selected={startDate}
-                                    selectsStart
-                                    startDate={startDate}
-                                    endDate={endDate}
-                                    maxDate={endDate}
-                                    onChange={(date: Date) =>
-                                        setStartDate(date)
-                                    }
-                                    required
+                                <Controller
+                                    control={control}
+                                    name='startDate'
+                                    rules={{ required: true }}
+                                    render={({ field }) => (
+                                        <DatePicker
+                                            todayButton='Today'
+                                            className={`form-control ${
+                                                errors.endDate
+                                                    ? 'is-invalid'
+                                                    : ''
+                                            }`}
+                                            dateFormat={DATE_FORMAT}
+                                            showMonthDropdown
+                                            showYearDropdown
+                                            dropdownMode='select'
+                                            selected={field.value}
+                                            selectsStart
+                                            startDate={getValues('startDate')}
+                                            endDate={getValues('endDate')}
+                                            maxDate={getValues('endDate')}
+                                            onChange={(date: Date) =>
+                                                field.onChange(date)
+                                            }
+                                        />
+                                    )}
                                 />
+                                {errors.startDate && (
+                                    <small className='text-danger'>
+                                        {errors.startDate.message}
+                                    </small>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -335,17 +361,27 @@ const EditProject: React.FunctionComponent<Props> = () => {
                                 </label>
                             </div>
                             <div className='col-sm-6'>
-                                <DatePicker
-                                    className='form-control'
-                                    dateFormat={DATE_FORMAT}
-                                    showMonthDropdown
-                                    showYearDropdown
-                                    dropdownMode='select'
-                                    selected={endDate}
-                                    selectsEnd
-                                    endDate={endDate}
-                                    minDate={startDate}
-                                    onChange={(date: Date) => setEndDate(date)}
+                                <Controller
+                                    control={control}
+                                    name='endDate'
+                                    render={({ field }) => (
+                                        <DatePicker
+                                            todayButton='Today'
+                                            className='form-control'
+                                            dateFormat={DATE_FORMAT}
+                                            showMonthDropdown
+                                            showYearDropdown
+                                            dropdownMode='select'
+                                            selected={field.value}
+                                            selectsStart
+                                            startDate={getValues('startDate')}
+                                            endDate={getValues('endDate')}
+                                            maxDate={getValues('endDate')}
+                                            onChange={(date: Date) =>
+                                                field.onChange(date)
+                                            }
+                                        />
+                                    )}
                                 />
                             </div>
                         </div>
