@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './index.css';
 import App from './App';
+import './i18n';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
