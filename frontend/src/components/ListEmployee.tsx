@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router';
-import { Link } from 'react-router-dom';
 
 import API from '../api';
 import { alertService } from '../service/alertService';
 
 import { Employee } from '../model/Employee';
+import DataTable from './DataTable';
+
+const headers = ['VISA', 'First name', 'Last name', 'Birthdate'];
 
 export interface Props {}
 
@@ -26,8 +28,7 @@ const ListEmployee: React.FunctionComponent<Props> = () => {
                 visa: item.visa,
                 firstName: item.firstName,
                 lastName: item.lastName,
-                birthDate: item.birthDate,
-                selected: false
+                birthDate: item.birthDate
             }));
 
             setEmployees(result);
@@ -37,31 +38,6 @@ const ListEmployee: React.FunctionComponent<Props> = () => {
     const handleNewBtnClick = () => {
         history.push('/employee/new');
     };
-
-    const handleRowSelected = (e: React.FormEvent<HTMLInputElement>) => {
-        const employeeId: number = Number(e.currentTarget.value);
-        if (e.currentTarget.checked) {
-            setEmployees(
-                employees.map((employee) =>
-                    employee.id === employeeId
-                        ? { ...employee, selected: true }
-                        : employee
-                )
-            );
-        } else {
-            setEmployees(
-                employees.map((employee) =>
-                    employee.id === employeeId
-                        ? { ...employee, selected: false }
-                        : employee
-                )
-            );
-        }
-    };
-
-    const nbOfSelectedItem = employees.filter(
-        (employee) => employee.selected
-    ).length;
 
     const handleDeleteItem = async (id: number) => {
         const response = await API.delete(`employee/${id}`);
@@ -86,76 +62,14 @@ const ListEmployee: React.FunctionComponent<Props> = () => {
                     </button>
                 </div>
             </div>
-            <table className='table table-bordered'>
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>VISA</th>
-                        <th>First name</th>
-                        <th>Last name</th>
-                        <th>Birthdate</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {employees.map((employee) => (
-                        <tr key={employee.id}>
-                            <td className='text-center'>
-                                <input
-                                    className='form-check-input'
-                                    type='checkbox'
-                                    value={employee.id}
-                                    onChange={handleRowSelected}
-                                />
-                            </td>
-                            <td>
-                                <Link
-                                    to={`/employee/edit/${employee.id}`}
-                                    className='nav-link'
-                                >
-                                    {employee.visa}
-                                </Link>
-                            </td>
-                            <td>{employee.firstName}</td>
-                            <td>{employee.lastName}</td>
-                            <td>
-                                {employee.birthDate != null
-                                    ? employee.birthDate.toLocaleString('vi-VN')
-                                    : ''}
-                            </td>
-                            <td className='text-center'>
-                                <button
-                                    className='btn btn-link text-danger'
-                                    onClick={() =>
-                                        handleDeleteItem(employee.id)
-                                    }
-                                >
-                                    <i className='bi bi-trash'></i>
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colSpan={6}>
-                            <div className='row justify-content-between'>
-                                <div className='col-3 ms-3'>
-                                    {nbOfSelectedItem} item
-                                    {nbOfSelectedItem > 1 ? 's' : ''} selected
-                                </div>
-                                <div className='col-3'>
-                                    <button className='btn btn-link text-danger text-decoration-none'>
-                                        Delete selected item
-                                        {nbOfSelectedItem > 1 ? 's' : ''}
-                                        <i className='bi bi-trash ms-2'></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
+            <DataTable
+                headers={headers}
+                items={employees}
+                id='id'
+                editLink='/employee/edit/'
+                linkColumn='visa'
+                deleteItem={handleDeleteItem}
+            />
         </div>
     );
 };
