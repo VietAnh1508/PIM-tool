@@ -40,8 +40,8 @@ public class GroupController {
 	@GetMapping
 	@ResponseBody
 	@Operation(summary = "Get all groups")
-	public List<Group> getAllGroups() {
-		return groupRepository.findAll();
+	public List<Group> getAllGroups(String searchText) {
+		return groupService.searchGroup(searchText);
 	}
 
 	@GetMapping("/simple")

@@ -20,6 +20,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Group extends AbstractEntity {
 
+    public static final String NAME = "name";
+    public static final String LEADER = "leader";
+
     private String name;
 
     @OneToOne

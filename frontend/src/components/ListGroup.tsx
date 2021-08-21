@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
 
@@ -7,19 +8,30 @@ import { alertService } from '../service/alertService';
 
 import { Group } from '../model/Group';
 
+interface SearchType {
+    text: string;
+}
+
 export interface Props {}
 
 const ListGroup: React.FunctionComponent<Props> = () => {
     const history = useHistory();
 
+    const { register, handleSubmit, setValue } = useForm<SearchType>();
+
     const [groups, setGroups] = useState<Group[]>([]);
 
     useEffect(() => {
-        getGroupData();
+        getGroupData(null);
     }, []);
 
-    const getGroupData = async () => {
-        const response = await API.get<Group[]>('group');
+    const getGroupData = async (searchText: string | null) => {
+        let url = 'group';
+        if (searchText !== null) {
+            url += `?searchText=${searchText}`;
+        }
+
+        const response = await API.get<Group[]>(url);
         if (response.status === 200) {
             const result: Group[] = response.data.map((item) => ({
                 id: item.id,
@@ -34,6 +46,15 @@ const ListGroup: React.FunctionComponent<Props> = () => {
 
     const handleNewBtnClick = () => {
         history.push('/group/new');
+    };
+
+    const onSearchGroup: SubmitHandler<SearchType> = async (data) => {
+        getGroupData(data.text);
+    };
+
+    const resetSearch = () => {
+        setValue('text', '');
+        getGroupData(null);
     };
 
     const handleRowSelected = (e: React.FormEvent<HTMLInputElement>) => {
@@ -75,6 +96,36 @@ const ListGroup: React.FunctionComponent<Props> = () => {
                         onClick={handleNewBtnClick}
                     >
                         New
+                    </button>
+                </div>
+            </div>
+            <div className='row mb-3'>
+                <div className='col-8'>
+                    <form
+                        className='row'
+                        onSubmit={handleSubmit(onSearchGroup)}
+                    >
+                        <div className='col'>
+                            <input
+                                type='text'
+                                className='form-control'
+                                placeholder='Group name, leader'
+                                {...register('text')}
+                            />
+                        </div>
+                        <div className='col'>
+                            <button className='btn btn-primary' type='submit'>
+                                Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div className='col-4'>
+                    <button
+                        className='btn btn-link text-decoration-none shadow-none'
+                        onClick={resetSearch}
+                    >
+                        Reset search
                     </button>
                 </div>
             </div>
@@ -140,6 +191,14 @@ const ListGroup: React.FunctionComponent<Props> = () => {
                     </tr>
                 </tfoot>
             </table>
+            {/* <DataTable
+                headers={headers}
+                items={groups}
+                id='id'
+                editLink='/group/edit/'
+                linkColumn='name'
+                deleteItem={handleDeleteItem}
+            /> */}
         </div>
     );
 };

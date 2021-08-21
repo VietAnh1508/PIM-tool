@@ -1,7 +1,10 @@
 package com.elca.backend.service.impl;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.elca.backend.dto.GroupDto;
@@ -10,6 +13,7 @@ import com.elca.backend.exception.RecordNotFoundException;
 import com.elca.backend.model.Employee;
 import com.elca.backend.model.Group;
 import com.elca.backend.repository.GroupRepository;
+import com.elca.backend.repository.GroupSpecification;
 import com.elca.backend.service.EmployeeService;
 import com.elca.backend.service.GroupService;
 
@@ -26,6 +30,18 @@ public class GroupServiceImpl implements GroupService {
 	public Group getGroupById(final Long id) throws RecordNotFoundException {
 		Optional<Group> groupOptional = groupRepository.findById(id);
 		return groupOptional.orElseThrow(() -> new RecordNotFoundException("Given group id is not exists"));
+	}
+
+	@Override
+	public List<Group> searchGroup(final String searchText) {
+		if (StringUtils.isEmpty(searchText)) {
+			return groupRepository.findAll();
+		}
+
+		return groupRepository.findAll(
+				Specification.where(GroupSpecification.nameContains(searchText))
+						.or(GroupSpecification.leaderNameContains(searchText))
+		);
 	}
 
 	@Override

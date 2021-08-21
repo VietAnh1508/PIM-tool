@@ -25,6 +25,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @AllArgsConstructor
 public class Employee extends AbstractEntity {
 
+    public static final String FIRST_NAME = "firstName";
+    public static final String LAST_NAME = "lastName";
+
     private String visa;
 
     private String firstName;
