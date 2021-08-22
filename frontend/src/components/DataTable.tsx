@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export interface Props {
     headers: string[];
@@ -11,6 +12,8 @@ export interface Props {
 }
 
 const DataTable: React.FunctionComponent<Props> = (props) => {
+    const { t } = useTranslation();
+
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
     const handleRowSelected = (e: React.FormEvent<HTMLInputElement>) => {
@@ -32,7 +35,7 @@ const DataTable: React.FunctionComponent<Props> = (props) => {
                     {props.headers.map((header, idx) => (
                         <th key={`h-${idx}`}>{header}</th>
                     ))}
-                    <th className='text-center'>Delete</th>
+                    <th className='text-center'>{t('label.delete')}</th>
                 </tr>
             </thead>
             <tbody>
@@ -70,7 +73,7 @@ const DataTable: React.FunctionComponent<Props> = (props) => {
                                     );
                                 }
 
-                                return <td key={itemKey}></td>;
+                                return <td key={itemKey}>{value}</td>;
                             }
                         )}
                         <td className='text-center'>
@@ -89,13 +92,15 @@ const DataTable: React.FunctionComponent<Props> = (props) => {
                     <td colSpan={6}>
                         <div className='row justify-content-between'>
                             <div className='col-3 ms-3'>
-                                {nbOfSelectedItem} item
-                                {nbOfSelectedItem > 1 ? 's' : ''} selected
+                                {t('label.itemSelected', {
+                                    count: nbOfSelectedItem
+                                })}
                             </div>
                             <div className='col-3'>
                                 <button className='btn btn-link text-danger text-decoration-none'>
-                                    Delete selected item
-                                    {nbOfSelectedItem > 1 ? 's' : ''}
+                                    {t('label.deleteSelectedItem', {
+                                        count: nbOfSelectedItem
+                                    })}
                                     <i className='bi bi-trash ms-2'></i>
                                 </button>
                             </div>

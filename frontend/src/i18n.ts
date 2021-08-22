@@ -19,7 +19,12 @@ i18n.use(LanguageDetector)
                         logout: 'Log out',
                         project: 'Project',
                         employee: 'Employee',
-                        group: 'Group'
+                        group: 'Group',
+                        itemSelected: '{{count}} item selected',
+                        itemSelected_plural: '{{count}} items selected',
+                        deleteSelectedItem: 'Delete selected item',
+                        deleteSelectedItem_plural: 'Delete selected items',
+                        delete: 'Delete'
                     }
                 }
             },
