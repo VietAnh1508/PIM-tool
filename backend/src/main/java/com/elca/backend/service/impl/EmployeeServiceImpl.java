@@ -35,7 +35,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public List<Employee> searchEmployees(final String searchText) {
         if (StringUtils.isEmpty(searchText)) {
-            employeeRepository.findAll();
+            return employeeRepository.findAll();
         }
 
         return employeeRepository.findAll(
