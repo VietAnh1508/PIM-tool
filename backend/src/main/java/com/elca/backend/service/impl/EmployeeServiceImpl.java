@@ -1,8 +1,11 @@
 package com.elca.backend.service.impl;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.elca.backend.dto.EmployeeDto;
@@ -11,6 +14,7 @@ import com.elca.backend.exception.EmployeeVisaAlreadyExistsException;
 import com.elca.backend.exception.RecordNotFoundException;
 import com.elca.backend.model.Employee;
 import com.elca.backend.repository.EmployeeRepository;
+import com.elca.backend.repository.EmployeeSpecification;
 import com.elca.backend.service.EmployeeService;
 
 import lombok.AllArgsConstructor;
@@ -26,6 +30,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         Optional<Employee> employeeOptional = employeeRepository.findById(id);
         return employeeOptional
                 .orElseThrow(() -> new RecordNotFoundException("Leader not found with id: " + id));
+    }
+
+    @Override
+    public List<Employee> searchEmployees(final String searchText) {
+        if (StringUtils.isEmpty(searchText)) {
+            employeeRepository.findAll();
+        }
+
+        return employeeRepository.findAll(
+                Specification.where(EmployeeSpecification.visaEqual(searchText))
+                        .or(EmployeeSpecification.nameContains(searchText))
+        );
     }
 
     @Override

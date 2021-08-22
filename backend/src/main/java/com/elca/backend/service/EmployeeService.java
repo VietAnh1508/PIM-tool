@@ -1,5 +1,6 @@
 package com.elca.backend.service;
 
+import java.util.List;
 import java.util.Set;
 
 import com.elca.backend.dto.EmployeeDto;
@@ -11,6 +12,8 @@ import com.elca.backend.model.Employee;
 public interface EmployeeService {
 
 	Employee getEmployeeById(Long id) throws RecordNotFoundException;
+
+	List<Employee> searchEmployees(String searchText);
 
 	Set<Employee> getEmployeeByListVisa(Set<String> visa);
 

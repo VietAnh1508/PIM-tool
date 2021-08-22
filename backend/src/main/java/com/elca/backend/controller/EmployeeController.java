@@ -40,8 +40,8 @@ public class EmployeeController {
     @GetMapping
     @ResponseBody
     @Operation(summary = "Get all employees")
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    public List<Employee> getAllEmployees(String searchText) {
+        return employeeService.searchEmployees(searchText);
     }
 
     @GetMapping("/leaders")
