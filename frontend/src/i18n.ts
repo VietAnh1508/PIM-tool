@@ -20,11 +20,14 @@ i18n.use(LanguageDetector)
                         project: 'Project',
                         employee: 'Employee',
                         group: 'Group',
+                        new: 'New',
                         itemSelected: '{{count}} item selected',
                         itemSelected_plural: '{{count}} items selected',
                         deleteSelectedItem: 'Delete selected item',
                         deleteSelectedItem_plural: 'Delete selected items',
-                        delete: 'Delete'
+                        delete: 'Delete',
+                        search: 'Search',
+                        resetSearch: 'Reset search'
                     }
                 }
             },
@@ -36,7 +39,11 @@ i18n.use(LanguageDetector)
                         logout: 'Se déconnecter',
                         project: 'Projet',
                         employee: 'Employé',
-                        group: 'Grouper'
+                        group: 'Grouper',
+                        new: 'Nouvelle',
+                        delete: 'Effacer',
+                        search: 'Chercher',
+                        resetSearch: 'Réinitialiser la recherche'
                     }
                 }
             }
