@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useHistory } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import API from '../api';
@@ -16,6 +17,8 @@ export interface Props {}
 
 const ListGroup: React.FunctionComponent<Props> = () => {
     const history = useHistory();
+
+    const { t } = useTranslation();
 
     const { register, handleSubmit, setValue } = useForm<SearchType>();
 
@@ -95,7 +98,7 @@ const ListGroup: React.FunctionComponent<Props> = () => {
                         className='btn btn-primary'
                         onClick={handleNewBtnClick}
                     >
-                        New
+                        {t('label.new')}
                     </button>
                 </div>
             </div>
@@ -115,7 +118,7 @@ const ListGroup: React.FunctionComponent<Props> = () => {
                         </div>
                         <div className='col'>
                             <button className='btn btn-primary' type='submit'>
-                                Search
+                                {t('label.search')}
                             </button>
                         </div>
                     </form>
@@ -125,7 +128,7 @@ const ListGroup: React.FunctionComponent<Props> = () => {
                         className='btn btn-link text-decoration-none shadow-none'
                         onClick={resetSearch}
                     >
-                        Reset search
+                        {t('label.resetSearch')}
                     </button>
                 </div>
             </div>
@@ -135,7 +138,7 @@ const ListGroup: React.FunctionComponent<Props> = () => {
                         <th></th>
                         <th>Name</th>
                         <th>Leader</th>
-                        <th>Delete</th>
+                        <th>{t('label.delete')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -176,13 +179,15 @@ const ListGroup: React.FunctionComponent<Props> = () => {
                         <td colSpan={6}>
                             <div className='row justify-content-between'>
                                 <div className='col-3 ms-3'>
-                                    {nbOfSelectedItem} item
-                                    {nbOfSelectedItem > 1 ? 's' : ''} selected
+                                    {t('label.itemSelected', {
+                                        count: nbOfSelectedItem
+                                    })}
                                 </div>
                                 <div className='col-3'>
                                     <button className='btn btn-link text-danger text-decoration-none'>
-                                        Delete selected item
-                                        {nbOfSelectedItem > 1 ? 's' : ''}
+                                        {t('label.deleteSelectedItem', {
+                                            count: nbOfSelectedItem
+                                        })}
                                         <i className='bi bi-trash ms-2'></i>
                                     </button>
                                 </div>

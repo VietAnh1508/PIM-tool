@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import API from '../api';
@@ -11,6 +12,8 @@ export interface Props {}
 
 const ListProject: React.FunctionComponent<Props> = () => {
     const history = useHistory();
+
+    const { t } = useTranslation();
 
     const [projects, setProjects] = useState<Project[]>([]);
     const [projectStatusList, setProjectStatusList] = useState<ProjectStatus[]>(
@@ -107,7 +110,7 @@ const ListProject: React.FunctionComponent<Props> = () => {
                         className='btn btn-primary'
                         onClick={handleNewBtnClick}
                     >
-                        New
+                        {t('label.new')}
                     </button>
                 </div>
             </div>
@@ -120,7 +123,7 @@ const ListProject: React.FunctionComponent<Props> = () => {
                         <th>Status</th>
                         <th>Customer</th>
                         <th>Start date</th>
-                        <th>Delete</th>
+                        <th>{t('label.delete')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -170,13 +173,15 @@ const ListProject: React.FunctionComponent<Props> = () => {
                         <td colSpan={7}>
                             <div className='row justify-content-between'>
                                 <div className='col-3 ms-3'>
-                                    {nbOfSelectedItem} item
-                                    {nbOfSelectedItem > 1 ? 's' : ''} selected
+                                    {t('label.itemSelected', {
+                                        count: nbOfSelectedItem
+                                    })}
                                 </div>
                                 <div className='col-3'>
                                     <button className='btn btn-link text-danger text-decoration-none'>
-                                        Delete selected item
-                                        {nbOfSelectedItem > 1 ? 's' : ''}
+                                        {t('label.deleteSelectedItem', {
+                                            count: nbOfSelectedItem
+                                        })}
                                         <i className='bi bi-trash ms-2'></i>
                                     </button>
                                 </div>
